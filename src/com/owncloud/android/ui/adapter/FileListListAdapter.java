@@ -17,8 +17,6 @@
  */
 package com.owncloud.android.ui.adapter;
 
-import java.util.Vector;
-
 import android.accounts.Account;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -38,6 +36,8 @@ import com.owncloud.android.files.services.FileDownloader.FileDownloaderBinder;
 import com.owncloud.android.files.services.FileUploader.FileUploaderBinder;
 import com.owncloud.android.ui.activity.ComponentsGetter;
 import com.owncloud.android.utils.DisplayUtils;
+
+import java.util.Vector;
 
 
 /**

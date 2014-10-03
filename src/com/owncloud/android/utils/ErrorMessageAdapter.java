@@ -18,9 +18,6 @@
 
 package com.owncloud.android.utils;
 
-import java.io.File;
-import java.net.SocketTimeoutException;
-import org.apache.commons.httpclient.ConnectTimeoutException;
 import android.content.res.Resources;
 
 import com.owncloud.android.R;
@@ -35,6 +32,11 @@ import com.owncloud.android.operations.RenameFileOperation;
 import com.owncloud.android.operations.SynchronizeFileOperation;
 import com.owncloud.android.operations.UnshareLinkOperation;
 import com.owncloud.android.operations.UploadFileOperation;
+
+import org.apache.commons.httpclient.ConnectTimeoutException;
+
+import java.io.File;
+import java.net.SocketTimeoutException;
 
 /**
  * Class to choose proper error messages to show to the user depending on the results of operations, always following the same policy

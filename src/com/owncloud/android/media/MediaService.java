@@ -35,13 +35,13 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.widget.Toast;
 
-import java.io.IOException;
-
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.ui.activity.FileActivity;
 import com.owncloud.android.ui.activity.FileDisplayActivity;
 import com.owncloud.android.utils.Log_OC;
+
+import java.io.IOException;
 
 
 /**

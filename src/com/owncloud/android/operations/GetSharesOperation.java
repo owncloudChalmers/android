@@ -17,14 +17,14 @@
 
 package com.owncloud.android.operations;
 
-import java.util.ArrayList;
-
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
-import com.owncloud.android.lib.resources.shares.OCShare;
 import com.owncloud.android.lib.resources.shares.GetRemoteSharesOperation;
+import com.owncloud.android.lib.resources.shares.OCShare;
 import com.owncloud.android.operations.common.SyncOperation;
 import com.owncloud.android.utils.Log_OC;
+
+import java.util.ArrayList;
 
 /**
  * Access to remote operation to get the share files/folders

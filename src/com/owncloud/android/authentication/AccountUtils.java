@@ -18,17 +18,17 @@
 
 package com.owncloud.android.authentication;
 
-import java.util.Locale;
-
-import com.owncloud.android.MainApp;
-import com.owncloud.android.lib.common.accounts.AccountTypeUtils;
-import com.owncloud.android.lib.resources.status.OwnCloudVersion;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import com.owncloud.android.MainApp;
+import com.owncloud.android.lib.common.accounts.AccountTypeUtils;
+import com.owncloud.android.lib.resources.status.OwnCloudVersion;
+
+import java.util.Locale;
 
 public class AccountUtils {
     public static final String WEBDAV_PATH_1_2 = "/webdav/owncloud.php";

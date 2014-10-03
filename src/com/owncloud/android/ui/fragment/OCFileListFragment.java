@@ -17,22 +17,6 @@
  */
 package com.owncloud.android.ui.fragment;
 
-import java.io.File;
-import java.util.ArrayList;
-
-import com.owncloud.android.R;
-import com.owncloud.android.datamodel.FileDataStorageManager;
-import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.files.FileMenuFilter;
-import com.owncloud.android.ui.adapter.FileListListAdapter;
-import com.owncloud.android.ui.activity.FileDisplayActivity;
-import com.owncloud.android.ui.dialog.ConfirmationDialogFragment;
-import com.owncloud.android.ui.dialog.RemoveFileDialogFragment;
-import com.owncloud.android.ui.dialog.RenameFileDialogFragment;
-import com.owncloud.android.ui.preview.PreviewImageFragment;
-import com.owncloud.android.ui.preview.PreviewMediaFragment;
-import com.owncloud.android.utils.Log_OC;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -41,6 +25,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+
+import com.owncloud.android.R;
+import com.owncloud.android.datamodel.FileDataStorageManager;
+import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.files.FileMenuFilter;
+import com.owncloud.android.ui.activity.FileDisplayActivity;
+import com.owncloud.android.ui.adapter.FileListListAdapter;
+import com.owncloud.android.ui.dialog.ConfirmationDialogFragment;
+import com.owncloud.android.ui.dialog.RemoveFileDialogFragment;
+import com.owncloud.android.ui.dialog.RenameFileDialogFragment;
+import com.owncloud.android.ui.preview.PreviewImageFragment;
+import com.owncloud.android.ui.preview.PreviewMediaFragment;
+import com.owncloud.android.utils.Log_OC;
+
+import java.io.File;
+import java.util.ArrayList;
 
 /**
  * A Fragment that lists all files and folders in a given path.
@@ -332,52 +332,41 @@ public class OCFileListFragment extends ExtendedListFragment {
     public boolean onContextItemSelected (MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();        
         mTargetFile = (OCFile) mAdapter.getItem(info.position);
-        switch (item.getItemId()) {                
-            case R.id.action_share_file: {
-                mContainerActivity.getFileOperationsHelper().shareFileWithLink(mTargetFile);
-                return true;
+        int i = item.getItemId();
+        if (i == R.id.action_share_file) {
+            mContainerActivity.getFileOperationsHelper().shareFileWithLink(mTargetFile);
+            return true;
+        } else if (i == R.id.action_unshare_file) {
+            mContainerActivity.getFileOperationsHelper().unshareFileWithLink(mTargetFile);
+            return true;
+        } else if (i == R.id.action_rename_file) {
+            RenameFileDialogFragment dialog = RenameFileDialogFragment.newInstance(mTargetFile);
+            dialog.show(getFragmentManager(), FileDetailFragment.FTAG_RENAME_FILE);
+            return true;
+        } else if (i == R.id.action_remove_file) {
+            RemoveFileDialogFragment dialog = RemoveFileDialogFragment.newInstance(mTargetFile);
+            dialog.show(getFragmentManager(), ConfirmationDialogFragment.FTAG_CONFIRMATION);
+            return true;
+        } else if (i == R.id.action_download_file || i == R.id.action_sync_file) {
+            mContainerActivity.getFileOperationsHelper().syncFile(mTargetFile);
+            return true;
+        } else if (i == R.id.action_cancel_download || i == R.id.action_cancel_upload) {
+            ((FileDisplayActivity) mContainerActivity).cancelTransference(mTargetFile);
+            return true;
+        } else if (i == R.id.action_see_details) {
+            mContainerActivity.showDetails(mTargetFile);
+            return true;
+        } else if (i == R.id.action_send_file) {
+            if (!mTargetFile.isDown()) {  // Download the file
+                Log_OC.d(TAG, mTargetFile.getRemotePath() + " : File must be downloaded");
+                ((FileDisplayActivity) mContainerActivity).startDownloadForSending(mTargetFile);
+
+            } else {
+                mContainerActivity.getFileOperationsHelper().sendDownloadedFile(mTargetFile);
             }
-            case R.id.action_unshare_file: {
-                mContainerActivity.getFileOperationsHelper().unshareFileWithLink(mTargetFile);
-                return true;
-            }
-            case R.id.action_rename_file: {
-                RenameFileDialogFragment dialog = RenameFileDialogFragment.newInstance(mTargetFile);
-                dialog.show(getFragmentManager(), FileDetailFragment.FTAG_RENAME_FILE);
-                return true;
-            }
-            case R.id.action_remove_file: {
-                RemoveFileDialogFragment dialog = RemoveFileDialogFragment.newInstance(mTargetFile);
-                dialog.show(getFragmentManager(), ConfirmationDialogFragment.FTAG_CONFIRMATION);
-                return true;
-            }
-            case R.id.action_download_file: 
-            case R.id.action_sync_file: {
-                mContainerActivity.getFileOperationsHelper().syncFile(mTargetFile);
-                return true;
-            }
-            case R.id.action_cancel_download:
-            case R.id.action_cancel_upload: {
-                ((FileDisplayActivity)mContainerActivity).cancelTransference(mTargetFile);
-                return true;
-            }
-            case R.id.action_see_details: {
-                mContainerActivity.showDetails(mTargetFile);
-                return true;
-            }
-            case R.id.action_send_file: {
-                // Obtain the file
-                if (!mTargetFile.isDown()) {  // Download the file
-                    Log_OC.d(TAG, mTargetFile.getRemotePath() + " : File must be downloaded");
-                    ((FileDisplayActivity)mContainerActivity).startDownloadForSending(mTargetFile);
-                    
-                } else {
-                    mContainerActivity.getFileOperationsHelper().sendDownloadedFile(mTargetFile);
-                }
-                return true;
-            }
-            default:
-                return super.onContextItemSelected(item); 
+            return true;
+        } else {
+            return super.onContextItemSelected(item);
         }
     }
 

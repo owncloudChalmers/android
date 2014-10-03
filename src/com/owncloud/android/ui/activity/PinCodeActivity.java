@@ -16,13 +16,6 @@
  */
 package com.owncloud.android.ui.activity;
 
-import java.util.Arrays;
-
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.owncloud.android.R;
-import com.owncloud.android.utils.DisplayUtils;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -39,6 +32,13 @@ import android.view.View.OnKeyListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.owncloud.android.R;
+import com.owncloud.android.utils.DisplayUtils;
+
+import java.util.Arrays;
 
 public class PinCodeActivity extends SherlockFragmentActivity {
 

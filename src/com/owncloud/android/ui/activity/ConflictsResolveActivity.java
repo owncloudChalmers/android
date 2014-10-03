@@ -18,6 +18,9 @@
 
 package com.owncloud.android.ui.activity;
 
+import android.content.Intent;
+import android.os.Bundle;
+
 import com.actionbarsherlock.app.ActionBar;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.files.services.FileUploader;
@@ -26,9 +29,6 @@ import com.owncloud.android.ui.dialog.ConflictsResolveDialog.Decision;
 import com.owncloud.android.ui.dialog.ConflictsResolveDialog.OnConflictDecisionMadeListener;
 import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.Log_OC;
-
-import android.content.Intent;
-import android.os.Bundle;
 
 /**
  * Wrapper activity which will be launched if keep-in-sync file will be modified by external

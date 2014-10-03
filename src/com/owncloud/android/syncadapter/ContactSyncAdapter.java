@@ -18,16 +18,6 @@
 
 package com.owncloud.android.syncadapter;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ByteArrayEntity;
-
-import com.owncloud.android.authentication.AccountUtils;
-import com.owncloud.android.lib.common.accounts.AccountUtils.Constants;
-
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
@@ -40,6 +30,15 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+
+import com.owncloud.android.authentication.AccountUtils;
+import com.owncloud.android.lib.common.accounts.AccountUtils.Constants;
+
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class ContactSyncAdapter extends AbstractOwnCloudSyncAdapter {
     private String mAddrBookUri;

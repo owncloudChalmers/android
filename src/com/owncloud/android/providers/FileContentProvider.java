@@ -18,17 +18,6 @@
 
 package com.owncloud.android.providers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.owncloud.android.R;
-import com.owncloud.android.db.ProviderMeta;
-import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
-import com.owncloud.android.lib.resources.shares.ShareType;
-import com.owncloud.android.utils.Log_OC;
-
-
-
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -44,6 +33,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+
+import com.owncloud.android.R;
+import com.owncloud.android.db.ProviderMeta;
+import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
+import com.owncloud.android.lib.resources.shares.ShareType;
+import com.owncloud.android.utils.Log_OC;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * The ContentProvider for the ownCloud App.

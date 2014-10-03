@@ -16,11 +16,11 @@
  */
 package com.owncloud.android;
 
-import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
-import com.owncloud.android.lib.common.OwnCloudClientManagerFactory.Policy;
-
 import android.app.Application;
 import android.content.Context;
+
+import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
+import com.owncloud.android.lib.common.OwnCloudClientManagerFactory.Policy;
 /**
  * Main Application of the project
  * 

@@ -29,13 +29,13 @@ import android.content.Intent;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.common.OwnCloudClient;
-import com.owncloud.android.lib.resources.shares.OCShare;
 import com.owncloud.android.lib.common.operations.RemoteOperation;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
-import com.owncloud.android.lib.resources.shares.GetRemoteSharesForFileOperation;
-import com.owncloud.android.lib.resources.shares.ShareType;
-import com.owncloud.android.lib.resources.shares.CreateRemoteShareOperation;
 import com.owncloud.android.lib.resources.files.FileUtils;
+import com.owncloud.android.lib.resources.shares.CreateRemoteShareOperation;
+import com.owncloud.android.lib.resources.shares.GetRemoteSharesForFileOperation;
+import com.owncloud.android.lib.resources.shares.OCShare;
+import com.owncloud.android.lib.resources.shares.ShareType;
 import com.owncloud.android.operations.common.SyncOperation;
 import com.owncloud.android.utils.Log_OC;
 
@@ -57,20 +57,20 @@ public class CreateShareOperation extends SyncOperation {
     /**
      * Constructor
      * @param path          Full path of the file/folder being shared. Mandatory argument
-     * @param shareType     ‘0’ = user, ‘1’ = group, ‘3’ = Public link. Mandatory argument
+     * @param shareType     ï¿½0ï¿½ = user, ï¿½1ï¿½ = group, ï¿½3ï¿½ = Public link. Mandatory argument
      * @param shareWith     User/group ID with who the file should be shared.  This is mandatory for shareType of 0 or 1
-     * @param publicUpload  If ‘false’ (default) public cannot upload to a public shared folder. 
-     *                      If ‘true’ public can upload to a shared folder. Only available for public link shares
+     * @param publicUpload  If ï¿½falseï¿½ (default) public cannot upload to a public shared folder. 
+     *                      If ï¿½trueï¿½ public can upload to a shared folder. Only available for public link shares
      * @param password      Password to protect a public link share. Only available for public link shares
-     * @param permissions   1 - Read only – Default for “public” shares
+     * @param permissions   1 - Read only ï¿½ Default for ï¿½publicï¿½ shares
      *                      2 - Update
      *                      4 - Create
      *                      8 - Delete
      *                      16- Re-share
-     *                      31- All above – Default for “private” shares
+     *                      31- All above ï¿½ Default for ï¿½privateï¿½ shares
      *                      For user or group shares.
      *                      To obtain combinations, add the desired values together.  
-     *                      For instance, for “Re-Share”, “delete”, “read”, “update”, add 16+8+2+1 = 27.
+     *                      For instance, for ï¿½Re-Shareï¿½, ï¿½deleteï¿½, ï¿½readï¿½, ï¿½updateï¿½, add 16+8+2+1 = 27.
      */
     public CreateShareOperation(String path, ShareType shareType, String shareWith, boolean publicUpload, 
             String password, int permissions, Intent sendIntent) {

@@ -17,18 +17,18 @@
 
 package com.owncloud.android.utils;
 
-import java.io.File;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.StatFs;
 
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.resources.files.RemoteFile;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.net.Uri;
-import android.os.Environment;
-import android.os.StatFs;
+import java.io.File;
 
 
 /**

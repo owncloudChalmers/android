@@ -18,21 +18,20 @@
 
 package com.owncloud.android.ui.fragment;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.owncloud.android.R;
-import com.owncloud.android.ui.ExtendedListView;
-import com.owncloud.android.utils.Log_OC;
-
-
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+
+import com.actionbarsherlock.app.SherlockFragment;
+import com.owncloud.android.R;
+import com.owncloud.android.ui.ExtendedListView;
+import com.owncloud.android.utils.Log_OC;
 
 /**
  *  TODO extending SherlockListFragment instead of SherlockFragment 

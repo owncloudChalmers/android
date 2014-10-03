@@ -16,9 +16,6 @@
  */
 package com.owncloud.android.ui.preview;
 
-import java.lang.ref.WeakReference;
-
-
 import android.accounts.Account;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -48,6 +45,8 @@ import com.owncloud.android.ui.dialog.ConfirmationDialogFragment;
 import com.owncloud.android.ui.dialog.RemoveFileDialogFragment;
 import com.owncloud.android.ui.fragment.FileFragment;
 import com.owncloud.android.utils.Log_OC;
+
+import java.lang.ref.WeakReference;
 
 
 /**
@@ -250,39 +249,31 @@ public class PreviewImageFragment extends FileFragment {
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_share_file: {
-                mContainerActivity.getFileOperationsHelper().shareFileWithLink(getFile());
-                return true;
-            }
-            case R.id.action_unshare_file: {
-                mContainerActivity.getFileOperationsHelper().unshareFileWithLink(getFile());
-                return true;
-            }
-            case R.id.action_open_file_with: {
-                openFile();
-                return true;
-            }
-            case R.id.action_remove_file: {
-                RemoveFileDialogFragment dialog = RemoveFileDialogFragment.newInstance(getFile());
-                dialog.show(getFragmentManager(), ConfirmationDialogFragment.FTAG_CONFIRMATION);
-                return true;
-            }
-            case R.id.action_see_details: {
-                seeDetails();
-                return true;
-            }
-            case R.id.action_send_file: {
-                mContainerActivity.getFileOperationsHelper().sendDownloadedFile(getFile());
-                return true;
-            }
-            case R.id.action_sync_file: {
-                mContainerActivity.getFileOperationsHelper().syncFile(getFile());
-                return true;
-            }
-            
-            default:
-                return false;
+        int i = item.getItemId();
+        if (i == R.id.action_share_file) {
+            mContainerActivity.getFileOperationsHelper().shareFileWithLink(getFile());
+            return true;
+        } else if (i == R.id.action_unshare_file) {
+            mContainerActivity.getFileOperationsHelper().unshareFileWithLink(getFile());
+            return true;
+        } else if (i == R.id.action_open_file_with) {
+            openFile();
+            return true;
+        } else if (i == R.id.action_remove_file) {
+            RemoveFileDialogFragment dialog = RemoveFileDialogFragment.newInstance(getFile());
+            dialog.show(getFragmentManager(), ConfirmationDialogFragment.FTAG_CONFIRMATION);
+            return true;
+        } else if (i == R.id.action_see_details) {
+            seeDetails();
+            return true;
+        } else if (i == R.id.action_send_file) {
+            mContainerActivity.getFileOperationsHelper().sendDownloadedFile(getFile());
+            return true;
+        } else if (i == R.id.action_sync_file) {
+            mContainerActivity.getFileOperationsHelper().syncFile(getFile());
+            return true;
+        } else {
+            return false;
         }
     }
     

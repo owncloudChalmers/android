@@ -18,22 +18,6 @@
 
 package com.owncloud.android.ui.activity;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-import java.util.Vector;
-
-import com.owncloud.android.MainApp;
-import com.owncloud.android.R;
-import com.owncloud.android.authentication.AccountAuthenticator;
-import com.owncloud.android.datamodel.FileDataStorageManager;
-import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.files.services.FileUploader;
-import com.owncloud.android.utils.Log_OC;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.AlertDialog;
@@ -61,6 +45,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+
+import com.owncloud.android.MainApp;
+import com.owncloud.android.R;
+import com.owncloud.android.authentication.AccountAuthenticator;
+import com.owncloud.android.datamodel.FileDataStorageManager;
+import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.files.services.FileUploader;
+import com.owncloud.android.utils.Log_OC;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Stack;
+import java.util.Vector;
 
 
 /**
@@ -248,8 +248,8 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
     @Override
     public void onClick(View v) {
         // click on button
-        switch (v.getId()) {
-        case R.id.uploader_choose_folder:
+        int i = v.getId();
+        if (i == R.id.uploader_choose_folder) {
             mUploadPath = "";   // first element in mParents is root dir, represented by ""; init mUploadPath with "/" results in a "//" prefix
             for (String p : mParents)
                 mUploadPath += p + OCFile.PATH_SEPARATOR;
@@ -257,8 +257,8 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
 
             uploadFiles();
 
-            break;
-        default:
+
+        } else {
             throw new IllegalArgumentException("Wrong element clicked");
         }
     }

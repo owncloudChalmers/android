@@ -17,8 +17,6 @@
 
 package com.owncloud.android.ui.activity;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -34,6 +32,8 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.owncloud.android.R;
 import com.owncloud.android.utils.DisplayUtils;
+
+import java.util.ArrayList;
 
 
 /**

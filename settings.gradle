@@ -1,4 +1,3 @@
-include ':actionbarsherlock:library'
-include ':'
+include ':actionbarsherlock:actionbarsherlock'
 include ':owncloud-android-library'
-include ':actionbarsherlock:samples:roboguice'
+include ':'

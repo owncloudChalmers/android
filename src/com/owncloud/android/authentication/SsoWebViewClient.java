@@ -17,16 +17,6 @@
 
 package com.owncloud.android.authentication;
 
-import java.io.ByteArrayInputStream;
-import java.lang.ref.WeakReference;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-
-import com.owncloud.android.lib.common.network.NetworkUtils;
-import com.owncloud.android.utils.Log_OC;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.http.SslCertificate;
@@ -42,6 +32,16 @@ import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import com.owncloud.android.lib.common.network.NetworkUtils;
+import com.owncloud.android.utils.Log_OC;
+
+import java.io.ByteArrayInputStream;
+import java.lang.ref.WeakReference;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 
 /**

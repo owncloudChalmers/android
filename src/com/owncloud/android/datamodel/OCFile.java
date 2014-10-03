@@ -18,14 +18,13 @@
 
 package com.owncloud.android.datamodel;
 
-import java.io.File;
-
-import com.owncloud.android.utils.Log_OC;
-
-
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.webkit.MimeTypeMap;
+
+import com.owncloud.android.utils.Log_OC;
+
+import java.io.File;
 
 public class OCFile implements Parcelable, Comparable<OCFile> {
 

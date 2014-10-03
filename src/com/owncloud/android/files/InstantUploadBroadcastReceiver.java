@@ -18,16 +18,6 @@
 
 package com.owncloud.android.files;
 
-import java.io.File;
-
-import com.owncloud.android.MainApp;
-import com.owncloud.android.authentication.AccountUtils;
-import com.owncloud.android.db.DbHandler;
-import com.owncloud.android.files.services.FileUploader;
-import com.owncloud.android.utils.FileStorageUtils;
-import com.owncloud.android.utils.Log_OC;
-
-
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,6 +29,15 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
 import android.webkit.MimeTypeMap;
+
+import com.owncloud.android.MainApp;
+import com.owncloud.android.authentication.AccountUtils;
+import com.owncloud.android.db.DbHandler;
+import com.owncloud.android.files.services.FileUploader;
+import com.owncloud.android.utils.FileStorageUtils;
+import com.owncloud.android.utils.Log_OC;
+
+import java.io.File;
 
 
 public class InstantUploadBroadcastReceiver extends BroadcastReceiver {

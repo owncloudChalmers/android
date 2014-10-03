@@ -18,9 +18,6 @@
 
 package com.owncloud.android.ui.activity;
 
-import java.io.File;
-import java.io.IOException;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
@@ -99,6 +96,9 @@ import com.owncloud.android.ui.preview.PreviewVideoActivity;
 import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.ErrorMessageAdapter;
 import com.owncloud.android.utils.Log_OC;
+
+import java.io.File;
+import java.io.IOException;
 
 
 /**
@@ -453,37 +453,27 @@ FileFragment.ContainerActivity, OnNavigationListener, OnSslUntrustedCertListener
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean retval = true;
-        switch (item.getItemId()) {
-        case R.id.action_create_dir: {
-            CreateFolderDialogFragment dialog = 
+        int i = item.getItemId();
+        if (i == R.id.action_create_dir) {
+            CreateFolderDialogFragment dialog =
                     CreateFolderDialogFragment.newInstance(getCurrentDir());
             dialog.show(getSupportFragmentManager(), "createdirdialog");
-            break;
-        }
-        case R.id.action_sync_account: {
+        } else if (i == R.id.action_sync_account) {
             startSynchronization();
-            break;
-        }
-        case R.id.action_upload: {
+        } else if (i == R.id.action_upload) {
             showDialog(DIALOG_CHOOSE_UPLOAD_SOURCE);
-            break;
-        }
-        case R.id.action_settings: {
+        } else if (i == R.id.action_settings) {
             Intent settingsIntent = new Intent(this, Preferences.class);
             startActivity(settingsIntent);
-            break;
-        }
-        case android.R.id.home: {
+        } else if (i == android.R.id.home) {
             FileFragment second = getSecondFragment();
             OCFile currentDir = getCurrentDir();
-            if((currentDir != null && currentDir.getParentId() != 0) || 
-                    (second != null && second.getFile() != null)) {                
-                onBackPressed(); 
-                
+            if ((currentDir != null && currentDir.getParentId() != 0) ||
+                    (second != null && second.getFile() != null)) {
+                onBackPressed();
+
             }
-            break;
-        }
-        default:
+        } else {
             retval = super.onOptionsItemSelected(item);
         }
         return retval;

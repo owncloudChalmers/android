@@ -17,9 +17,6 @@
 
 package com.owncloud.android.ui.activity;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -36,6 +33,9 @@ import com.owncloud.android.R;
 import com.owncloud.android.ui.adapter.LogListAdapter;
 import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.FileStorageUtils;
+
+import java.io.File;
+import java.util.ArrayList;
 
 
 

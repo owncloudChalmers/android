@@ -17,14 +17,6 @@
  */
 package com.owncloud.android.ui.preview;
 
-import java.lang.ref.WeakReference;
-
-import com.owncloud.android.R;
-import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.files.services.FileDownloader.FileDownloaderBinder;
-import com.owncloud.android.ui.fragment.FileFragment;
-import com.owncloud.android.utils.Log_OC;
-
 import android.accounts.Account;
 import android.os.Bundle;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -36,7 +28,14 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.owncloud.android.R;
+import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.files.services.FileDownloader.FileDownloaderBinder;
 import com.owncloud.android.lib.common.network.OnDatatransferProgressListener;
+import com.owncloud.android.ui.fragment.FileFragment;
+import com.owncloud.android.utils.Log_OC;
+
+import java.lang.ref.WeakReference;
 
 
 /**
@@ -185,14 +184,12 @@ public class FileDownloadFragment extends FileFragment implements OnClickListene
     
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.cancelBtn: {
-                mContainerActivity.getFileOperationsHelper().cancelTransference(getFile());
-                getActivity().finish();
-                break;
-            }
-            default:
-                Log_OC.e(TAG, "Incorrect view clicked!");
+        int i = v.getId();
+        if (i == R.id.cancelBtn) {
+            mContainerActivity.getFileOperationsHelper().cancelTransference(getFile());
+            getActivity().finish();
+        } else {
+            Log_OC.e(TAG, "Incorrect view clicked!");
         }
     }
 

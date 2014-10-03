@@ -17,10 +17,9 @@
 
 package com.owncloud.android.operations;
 
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.Context;
 
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.lib.common.OwnCloudClient;
@@ -31,9 +30,10 @@ import com.owncloud.android.lib.common.operations.RemoteOperationResult.ResultCo
 import com.owncloud.android.lib.resources.status.OwnCloudVersion;
 import com.owncloud.android.utils.Log_OC;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.content.Context;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**

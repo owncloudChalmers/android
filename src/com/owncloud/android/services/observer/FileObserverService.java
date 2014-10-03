@@ -18,11 +18,6 @@
 
 package com.owncloud.android.services.observer;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import android.accounts.Account;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -40,6 +35,11 @@ import com.owncloud.android.files.services.FileDownloader;
 import com.owncloud.android.operations.SynchronizeFileOperation;
 import com.owncloud.android.utils.FileStorageUtils;
 import com.owncloud.android.utils.Log_OC;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 
 /**

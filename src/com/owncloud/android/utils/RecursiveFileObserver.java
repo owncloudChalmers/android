@@ -18,12 +18,12 @@
 
 package com.owncloud.android.utils;
 
+import android.os.FileObserver;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
-import android.os.FileObserver;
 
 public class RecursiveFileObserver extends FileObserver {
 

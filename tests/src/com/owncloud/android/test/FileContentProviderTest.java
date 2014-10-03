@@ -1,13 +1,14 @@
 package com.owncloud.android.test;
 
-import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
-import com.owncloud.android.providers.FileContentProvider;
 import android.annotation.TargetApi;
 import android.net.Uri;
 import android.os.Build;
 import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 import android.util.Log;
+
+import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
+import com.owncloud.android.providers.FileContentProvider;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE)
 public class FileContentProviderTest extends ProviderTestCase2<FileContentProvider> {

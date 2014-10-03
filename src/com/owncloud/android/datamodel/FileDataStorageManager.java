@@ -18,22 +18,6 @@
 
 package com.owncloud.android.datamodel;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Vector;
-
-import com.owncloud.android.MainApp;
-import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
-import com.owncloud.android.lib.resources.shares.OCShare;
-import com.owncloud.android.lib.resources.shares.ShareType;
-import com.owncloud.android.lib.resources.files.FileUtils;
-import com.owncloud.android.utils.FileStorageUtils;
-import com.owncloud.android.utils.Log_OC;
-
-
 import android.accounts.Account;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
@@ -45,6 +29,21 @@ import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.RemoteException;
+
+import com.owncloud.android.MainApp;
+import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
+import com.owncloud.android.lib.resources.files.FileUtils;
+import com.owncloud.android.lib.resources.shares.OCShare;
+import com.owncloud.android.lib.resources.shares.ShareType;
+import com.owncloud.android.utils.FileStorageUtils;
+import com.owncloud.android.utils.Log_OC;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Vector;
 
 public class FileDataStorageManager {
 
@@ -1169,7 +1168,7 @@ public class FileDataStorageManager {
                 path = path + FileUtils.PATH_SEPARATOR;
             }           
 
-            // Update OCFile with data from share: ShareByLink  ¿and publicLink?
+            // Update OCFile with data from share: ShareByLink  ï¿½and publicLink?
             OCFile file = getFileByPath(path);
             if (file != null) {
                 if (share.getShareType().equals(ShareType.PUBLIC_LINK)) {

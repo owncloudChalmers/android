@@ -24,7 +24,9 @@
 
 package com.owncloud.android.operations;
 
-import java.util.ArrayList;
+import android.content.Context;
+import android.net.Uri;
+import android.util.Log;
 
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.operations.OnRemoteOperationListener;
@@ -33,9 +35,7 @@ import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult.ResultCode;
 import com.owncloud.android.lib.resources.files.ExistenceCheckRemoteOperation;
 
-import android.content.Context;
-import android.net.Uri;
-import android.util.Log;
+import java.util.ArrayList;
 
 /**
  * Operation to find out what authentication method requires

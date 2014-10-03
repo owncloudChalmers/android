@@ -1,5 +1,9 @@
 package com.owncloud.android.utils;
 
+import android.util.Log;
+
+import com.owncloud.android.MainApp;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -7,10 +11,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
-import com.owncloud.android.MainApp;
-
-import android.util.Log;
 
 
 

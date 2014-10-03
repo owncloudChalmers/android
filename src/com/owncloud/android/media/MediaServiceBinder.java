@@ -18,15 +18,15 @@
 package com.owncloud.android.media;
 
 
-import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.media.MediaService.State;
-import com.owncloud.android.utils.Log_OC;
-
 import android.accounts.Account;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.widget.MediaController;
+
+import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.media.MediaService.State;
+import com.owncloud.android.utils.Log_OC;
 
 
 /**
