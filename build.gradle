@@ -1,5 +1,4 @@
 
-
 buildscript {
     repositories{
         mavenCentral()
@@ -48,7 +47,7 @@ android {
         // conflict with src/ being used by the main source set.
         // Adding new build types or product flavors should be accompanied
         // by a similar customization.
-        //debug.setRoot('build-types/debug')
+        debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
     }
 
