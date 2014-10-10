@@ -48,12 +48,15 @@ import android.widget.EditText;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountAuthenticator;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.files.services.FileUploader;
+import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.Log_OC;
 
 import java.io.File;
@@ -71,7 +74,7 @@ import java.util.Vector;
  * @author Bartek Przybylski
  * 
  */
-public class Uploader extends ListActivity implements OnItemClickListener, android.view.View.OnClickListener {
+public class Uploader extends SherlockListActivity implements OnItemClickListener, android.view.View.OnClickListener {
     private static final String TAG = "ownCloudUploader";
 
     private Account mAccount;
@@ -94,11 +97,10 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mParents = new Stack<String>();
 
-
-
+        ActionBar actionBar = getSherlock().getActionBar();
+        actionBar.setIcon(DisplayUtils.getSeasonalIconId());
 
         SharedPreferences appPreferences = PreferenceManager
                 .getDefaultSharedPreferences(getApplicationContext());
@@ -315,6 +317,14 @@ public class Uploader extends ListActivity implements OnItemClickListener, andro
 
     private void populateDirectoryList() {
         setContentView(R.layout.uploader_layout);
+
+        String current_dir = mParents.peek();
+        if(current_dir.equals("")){
+            getActionBar().setTitle(getString(R.string.default_display_name_for_root_folder));
+        }
+        else{
+            getActionBar().setTitle(current_dir);
+        }
 
         String full_path = "";
 
