@@ -1504,6 +1504,13 @@ public class FileDisplayActivity extends HookActivity implements
                     } else {
                         getFileOperationsHelper().openFile(renamedFile);
                     }
+                } else if (details instanceof PreviewTextFragment && renamedFile.equals(details.getFile())){
+                    ((PreviewTextFragment)details).updateFile(renamedFile);
+                    if (PreviewTextFragment.canBePreviewed(renamedFile)) {
+                        startTextPreview(renamedFile);
+                    } else {
+                        getFileOperationsHelper().openFile(renamedFile);
+                    }
                 }
             }
 
