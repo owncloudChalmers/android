@@ -1504,8 +1504,8 @@ public class FileDisplayActivity extends HookActivity implements
                     } else {
                         getFileOperationsHelper().openFile(renamedFile);
                     }
-                } else if (details instanceof PreviewTextFragment && renamedFile.equals(details.getFile())){
-                    ((PreviewTextFragment)details).updateFile(renamedFile);
+                } else if (details instanceof PreviewTextFragment && renamedFile.equals(details.getFile())) {
+                    ((PreviewTextFragment) details).updateFile(renamedFile);
                     if (PreviewTextFragment.canBePreviewed(renamedFile)) {
                         startTextPreview(renamedFile);
                     } else {
@@ -1721,7 +1721,10 @@ public class FileDisplayActivity extends HookActivity implements
      * @param file Text {@link OCFile} to preview.
      */
     public void startTextPreview(OCFile file) {
-        Fragment textPreviewFragment = Fragment.instantiate(getApplicationContext(), PreviewTextFragment.class.getName());
+        Bundle args = new Bundle();
+        args.putParcelable(EXTRA_FILE, file);
+        args.putParcelable(EXTRA_ACCOUNT, getAccount());
+        Fragment textPreviewFragment = Fragment.instantiate(getApplicationContext(), PreviewTextFragment.class.getName(), args);
         setSecondFragment(textPreviewFragment);
         updateFragmentsVisibility(true);
         updateNavigationElementsInActionBar(file);
