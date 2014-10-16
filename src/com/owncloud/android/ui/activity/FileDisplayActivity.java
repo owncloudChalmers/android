@@ -436,6 +436,9 @@ public class FileDisplayActivity extends HookActivity implements
                         if (PreviewMediaFragment.canBePreviewed(mWaitingToPreview)) {
                             startMediaPreview(mWaitingToPreview, 0, true);
                             detailsFragmentChanged = true;
+                        } else if (PreviewTextFragment.canBePreviewed(mWaitingToPreview)) {
+                            startTextPreview(mWaitingToPreview);
+                            detailsFragmentChanged = true;
                         } else {
                             getFileOperationsHelper().openFile(mWaitingToPreview);
                         }
