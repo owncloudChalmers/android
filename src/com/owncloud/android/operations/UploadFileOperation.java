@@ -352,9 +352,12 @@ public class UploadFileOperation extends RemoteOperation {
             }
         }
 
-        if(mRemoveInstantOriginal && result.isSuccess()){
-            originalFile.delete();
-            Log.wtf(TAG, "Deleted uploaded file: " + originalFile.getAbsolutePath());
+        if(mIsInstant && mRemoveInstantOriginal && result.isSuccess()){
+            if(originalFile.delete()) {
+                Log.wtf(TAG, "Deleted instantly uploaded file: " + originalFile.getAbsolutePath());
+            } else {
+                Log.wtf(TAG, "Failed to delete instantly uploaded file: " + originalFile.getAbsolutePath());
+            }
         }
 
         return result;
