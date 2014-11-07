@@ -508,7 +508,7 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
                     OCFile parent = mStorageManager.getFileByPath(remoteParentPath);
                     mCurrentUpload.getFile().setParentId(parent.getFileId());
                     uploadResult = mCurrentUpload.execute(mUploadClient);
-                    if (uploadResult.isSuccess() && mCurrentUpload.isInstant() && mCurrentUpload.isRemoveInstantOriginal()) {
+                    if (uploadResult.isSuccess() && !(mCurrentUpload.isInstant() && mCurrentUpload.isRemoveInstantOriginal())) {
                         saveUploadedFile();
                     }
                 } else {
