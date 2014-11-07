@@ -151,6 +151,8 @@ public class UploadFileOperation extends RemoteOperation {
         return mIsInstant;
     }
 
+    public boolean isRemoveInstantOriginal() { return mRemoveInstantOriginal; }
+
     public boolean isRemoteFolderToBeCreated() {
         return mRemoteFolderToBeCreated;
     }
