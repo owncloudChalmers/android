@@ -126,6 +126,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
         i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL,
                 pm.getBoolean("instant_upload_delete_original", false));
+        i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
         context.startService(i);
     }
 
