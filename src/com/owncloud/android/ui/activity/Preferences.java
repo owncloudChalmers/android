@@ -271,11 +271,14 @@ public class Preferences extends SherlockPreferenceActivity implements AccountMa
         final CheckBoxPreference pInstantVideoUpload = (CheckBoxPreference) findPreference("instant_video_uploading");
         final CheckBoxPreference pInstantUploadNoLocal = (CheckBoxPreference) findPreference("instant_upload_no_local");
 
+        pInstantUploadNoLocal.setEnabled(pInstantVideoUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
+                || pInstantUpload.getSharedPreferences().getBoolean(pInstantUpload.getKey(), false));
+
         pInstantUpload.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 pInstantUploadNoLocal.setEnabled(pInstantVideoUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
-                        || (boolean)newValue);
+                        || (Boolean)newValue);
                 return true;
             }
         });
@@ -283,8 +286,8 @@ public class Preferences extends SherlockPreferenceActivity implements AccountMa
         pInstantVideoUpload.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                pInstantUploadNoLocal.setEnabled(pInstantVideoUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
-                        || (boolean)newValue);
+                pInstantUploadNoLocal.setEnabled(pInstantUpload.getSharedPreferences().getBoolean(pInstantUpload.getKey(), false)
+                        || (Boolean)newValue);
                 return true;
             }
         });
