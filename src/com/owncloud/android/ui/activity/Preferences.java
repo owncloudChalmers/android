@@ -283,7 +283,7 @@ public class Preferences extends SherlockPreferenceActivity implements AccountMa
         pInstantVideoUpload.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                pInstantUploadNoLocal.setEnabled(pInstantUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
+                pInstantUploadNoLocal.setEnabled(pInstantUpload.getSharedPreferences().getBoolean(pInstantUpload.getKey(), false)
                         || (boolean)newValue);
                 return true;
             }
