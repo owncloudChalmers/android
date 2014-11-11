@@ -114,7 +114,6 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-
         SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(context);
 
         Intent i = new Intent(context, FileUploader.class);
@@ -124,9 +123,11 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         i.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_SINGLE_FILE);
         i.putExtra(FileUploader.KEY_MIME_TYPE, mime_type);
         i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
-        i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL,
-                pm.getBoolean("instant_upload_delete_original", false));
-        i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
+        // Intent information indicating that no local files should be stored
+        if(pm.getBoolean("instant_upload_no_local", false)){
+            i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, true);
+            i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
+        }
         context.startService(i);
     }
 
@@ -165,6 +166,8 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
+        SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(context);
+
         Intent i = new Intent(context, FileUploader.class);
         i.putExtra(FileUploader.KEY_ACCOUNT, account);
         i.putExtra(FileUploader.KEY_LOCAL_FILE, file_path);
@@ -172,6 +175,11 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         i.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_SINGLE_FILE);
         i.putExtra(FileUploader.KEY_MIME_TYPE, mime_type);
         i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
+        // Intent information indicating that no local files should be stored
+        if(pm.getBoolean("instant_upload_no_local", false)){
+            i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, true);
+            i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
+        }
         context.startService(i);
 
     }
