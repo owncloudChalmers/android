@@ -267,15 +267,17 @@ public class Preferences extends SherlockPreferenceActivity implements AccountMa
        }
 
 
-        final Preference pInstantUpload = findPreference("instant_uploading");
-        final Preference pInstantVideoUpload = findPreference("instant_video_uploading");
-        final Preference pInstantUploadNoLocal = findPreference("instant_upload_no_local");
+        final CheckBoxPreference pInstantUpload = (CheckBoxPreference) findPreference("instant_uploading");
+        final CheckBoxPreference pInstantVideoUpload = (CheckBoxPreference) findPreference("instant_video_uploading");
+        final CheckBoxPreference pInstantUploadNoLocal = (CheckBoxPreference) findPreference("instant_upload_no_local");
 
         pInstantUpload.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                pInstantUploadNoLocal.setEnabled(pInstantVideoUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
-                        || (boolean)newValue);
+                boolean val = pInstantVideoUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
+                        || (boolean)newValue;
+                pInstantUploadNoLocal.setChecked(val);
+                pInstantUploadNoLocal.setEnabled(val);
                 return true;
             }
         });
@@ -283,8 +285,10 @@ public class Preferences extends SherlockPreferenceActivity implements AccountMa
         pInstantVideoUpload.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                pInstantUploadNoLocal.setEnabled(pInstantUpload.getSharedPreferences().getBoolean(pInstantUpload.getKey(), false)
-                        || (boolean)newValue);
+                boolean val = pInstantVideoUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
+                        || (boolean)newValue;
+                pInstantUploadNoLocal.setChecked(val);
+                pInstantUploadNoLocal.setEnabled(val);
                 return true;
             }
         });
