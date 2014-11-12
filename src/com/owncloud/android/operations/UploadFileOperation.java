@@ -47,10 +47,14 @@ import com.owncloud.android.lib.resources.files.UploadRemoteFileOperation;
 import com.owncloud.android.utils.FileStorageUtils;
 
 import android.accounts.Account;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 
@@ -359,8 +363,7 @@ public class UploadFileOperation extends RemoteOperation {
 
         if(mIsInstant && mRemoveInstantOriginal && result.isSuccess()){
             if(originalFile.delete()) {
-                mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-                        Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+                removeLocalFile(originalFile);
                 Log.wtf(TAG, "Deleted instantly uploaded file: " + originalFile.getAbsolutePath());
             } else {
                 Log.wtf(TAG, "Failed to delete instantly uploaded file: " + originalFile.getAbsolutePath());
@@ -368,6 +371,29 @@ public class UploadFileOperation extends RemoteOperation {
         }
 
         return result;
+    }
+
+    private void removeLocalFile(File file){
+        // Set up the projection (we only need the ID)
+        String[] projection = { MediaStore.Images.Media._ID };
+
+// Match on the file path
+        String selection = MediaStore.Images.Media.DATA + " = ?";
+        String[] selectionArgs = new String[] { file.getAbsolutePath() };
+
+// Query for the ID of the media matching the file path
+        Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        ContentResolver contentResolver = mContext.getContentResolver();
+        Cursor c = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+        if (c.moveToFirst()) {
+            // We found the ID. Deleting the item via the content provider will also remove the file
+            long id = c.getLong(c.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
+            Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+            contentResolver.delete(deleteUri, null, null);
+        } else {
+            // File not found in media store DB
+        }
+        c.close();
     }
 
     private void createNewOCFile(String newRemotePath) {
