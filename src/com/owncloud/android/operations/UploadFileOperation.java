@@ -84,6 +84,7 @@ public class UploadFileOperation extends RemoteOperation {
     private Set<OnDatatransferProgressListener> mDataTransferListeners = new HashSet<OnDatatransferProgressListener>();
     private final AtomicBoolean mCancellationRequested = new AtomicBoolean(false);
     private Context mContext;
+    private int mFileType;
     
     private UploadRemoteFileOperation mUploadOperation;
 
@@ -97,7 +98,8 @@ public class UploadFileOperation extends RemoteOperation {
                                 boolean removeInstantOriginal,
                                 boolean forceOverwrite,
                                 int localBehaviour, 
-                                Context context) {
+                                Context context,
+                                int fileType) {
         if (account == null)
             throw new IllegalArgumentException("Illegal NULL account in UploadFileOperation creation");
         if (file == null)
@@ -114,6 +116,7 @@ public class UploadFileOperation extends RemoteOperation {
         mRemotePath = file.getRemotePath();
         mChunked = chunked;
         mIsInstant = isInstant;
+        mFileType = fileType;
         mRemoveInstantOriginal = removeInstantOriginal;
         mForceOverwrite = forceOverwrite;
         mLocalBehaviour = localBehaviour;
@@ -362,8 +365,20 @@ public class UploadFileOperation extends RemoteOperation {
         }
 
         if(mIsInstant && mRemoveInstantOriginal && result.isSuccess()){
-            if(originalFile.delete()) {
-                removeLocalFile(originalFile);
+            boolean fileDelteResult;
+            switch(mFileType){
+                case FileUploader.FILE_TYPE_IMAGE:
+                    fileDelteResult = FileStorageUtils.deleteImageFile(mContext, originalFile);
+                    break;
+                case FileUploader.FILE_TYPE_VIDEO:
+                    fileDelteResult = FileStorageUtils.deleteVideoFile(mContext, originalFile);
+                    break;
+                default:
+                    fileDelteResult = originalFile.delete();
+                    break;
+            }
+
+            if(fileDelteResult) {
                 Log.wtf(TAG, "Deleted instantly uploaded file: " + originalFile.getAbsolutePath());
             } else {
                 Log.wtf(TAG, "Failed to delete instantly uploaded file: " + originalFile.getAbsolutePath());
@@ -371,29 +386,6 @@ public class UploadFileOperation extends RemoteOperation {
         }
 
         return result;
-    }
-
-    private void removeLocalFile(File file){
-        // Set up the projection (we only need the ID)
-        String[] projection = { MediaStore.Images.Media._ID };
-
-// Match on the file path
-        String selection = MediaStore.Images.Media.DATA + " = ?";
-        String[] selectionArgs = new String[] { file.getAbsolutePath() };
-
-// Query for the ID of the media matching the file path
-        Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        ContentResolver contentResolver = mContext.getContentResolver();
-        Cursor c = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
-        if (c.moveToFirst()) {
-            // We found the ID. Deleting the item via the content provider will also remove the file
-            long id = c.getLong(c.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
-            Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-            contentResolver.delete(deleteUri, null, null);
-        } else {
-            // File not found in media store DB
-        }
-        c.close();
     }
 
     private void createNewOCFile(String newRemotePath) {

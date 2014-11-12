@@ -25,12 +25,16 @@ import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.resources.files.RemoteFile;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.StatFs;
+import android.provider.MediaStore;
 
 
 /**
@@ -40,6 +44,54 @@ import android.os.StatFs;
  */
 public class FileStorageUtils {
     //private static final String LOG_TAG = "FileStorageUtils";
+
+    /**
+     * Deletes the provided image file while clearing caches. Useful for deleting images where, for instance,
+     * galleries would keep a thumbnail for the image in cache. If the file is not an image, it will still
+     * be deleted but caches may not have been cleared.
+     * @param context The context to delete the image file from
+     * @param file The image file to delete
+     * @return true if successful; else false
+     */
+    public static final boolean deleteImageFile(Context context, File file){
+        String selection = MediaStore.Images.Media.DATA + " = ?";
+        return FileStorageUtils.deleteMediaFile(context, file, selection);
+    }
+
+    /**
+     * Deletes the provided video file while clearing caches. Useful for deleting videos where, for instance,
+     * galleries would keep a thumbnail for the video file in cache. If the file is not a video, it will still
+     * be deleted but caches may not have been cleared.
+     * @param context The context to delete the video file from
+     * @param file The video file to delete
+     * @return true if successful; else false
+     */
+    public static final boolean deleteVideoFile(Context context, File file){
+        String selection = MediaStore.Images.Media.DATA + " = ?";
+        return FileStorageUtils.deleteMediaFile(context, file, selection);
+    }
+
+    private static final boolean deleteMediaFile(Context context, File file, String selection){
+        String[] projection = { MediaStore.Images.Media._ID };
+        String[] selectionArgs = new String[] { file.getAbsolutePath() };
+
+        // Match on file path
+        Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        ContentResolver contentResolver = context.getContentResolver();
+        Cursor c = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+        boolean result = false;
+        // Check if matching is found
+        if (c.moveToFirst()) {
+            // Delete file
+            long id = c.getLong(c.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
+            Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+            contentResolver.delete(deleteUri, null, null);
+            result = true;
+        }
+        c.close();
+
+        return result;
+    }
 
     public static final String getSavePath(String accountName) {
         File sdCard = Environment.getExternalStorageDirectory();
