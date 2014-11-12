@@ -48,6 +48,9 @@ import com.owncloud.android.utils.FileStorageUtils;
 
 import android.accounts.Account;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
 
 
@@ -356,6 +359,8 @@ public class UploadFileOperation extends RemoteOperation {
 
         if(mIsInstant && mRemoveInstantOriginal && result.isSuccess()){
             if(originalFile.delete()) {
+                mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                        Uri.parse("file://" + Environment.getExternalStorageDirectory())));
                 Log.wtf(TAG, "Deleted instantly uploaded file: " + originalFile.getAbsolutePath());
             } else {
                 Log.wtf(TAG, "Failed to delete instantly uploaded file: " + originalFile.getAbsolutePath());

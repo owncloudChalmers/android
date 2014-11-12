@@ -221,7 +221,6 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
                         i.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_SINGLE_FILE);
                         i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
                         context.startService(i);
-
                     } else {
                         Log_OC.w(TAG, "Instant upload file " + f.getAbsolutePath() + " dont exist anymore");
                     }
