@@ -51,11 +51,14 @@ public class FileStorageUtils {
      * be deleted but caches may not have been cleared.
      * @param context The context to delete the image file from
      * @param file The image file to delete
-     * @return true if successful; else false
+     * @return true if successful; otherwise false
      */
     public static final boolean deleteImageFile(Context context, File file){
+        String projectionID = MediaStore.Images.Media._ID;
         String selection = MediaStore.Images.Media.DATA + " = ?";
-        return FileStorageUtils.deleteMediaFile(context, file, selection);
+        Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+        return FileStorageUtils.deleteMediaFile(context, file, projectionID, queryUri, selection);
     }
 
     /**
@@ -64,27 +67,30 @@ public class FileStorageUtils {
      * be deleted but caches may not have been cleared.
      * @param context The context to delete the video file from
      * @param file The video file to delete
-     * @return true if successful; else false
+     * @return true if successful; otherwise false
      */
     public static final boolean deleteVideoFile(Context context, File file){
-        String selection = MediaStore.Images.Media.DATA + " = ?";
-        return FileStorageUtils.deleteMediaFile(context, file, selection);
+        String projectionID = MediaStore.Video.Media._ID;
+        String selection = MediaStore.Video.Media.DATA + " = ?";
+        Uri queryUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+
+        return FileStorageUtils.deleteMediaFile(context, file, projectionID, queryUri, selection);
     }
 
-    private static final boolean deleteMediaFile(Context context, File file, String selection){
-        String[] projection = { MediaStore.Images.Media._ID };
+    private static final boolean deleteMediaFile(Context context, File file, String projectionID, Uri styleURI, String selection){
+        String[] projection = { projectionID };
         String[] selectionArgs = new String[] { file.getAbsolutePath() };
 
         // Match on file path
-        Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         ContentResolver contentResolver = context.getContentResolver();
-        Cursor c = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+        Cursor c = contentResolver.query(styleURI, projection, selection, selectionArgs, null);
         boolean result = false;
         // Check if matching is found
         if (c.moveToFirst()) {
             // Delete file
-            long id = c.getLong(c.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
-            Uri deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+            long id = c.getLong(c.getColumnIndexOrThrow(projectionID));
+            // Append id to content uri
+            Uri deleteUri = ContentUris.withAppendedId(styleURI, id);
             contentResolver.delete(deleteUri, null, null);
             result = true;
         }

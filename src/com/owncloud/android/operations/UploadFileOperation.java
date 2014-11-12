@@ -365,20 +365,20 @@ public class UploadFileOperation extends RemoteOperation {
         }
 
         if(mIsInstant && mRemoveInstantOriginal && result.isSuccess()){
-            boolean fileDelteResult;
+            boolean fileDeleteResult;
             switch(mFileType){
                 case FileUploader.FILE_TYPE_IMAGE:
-                    fileDelteResult = FileStorageUtils.deleteImageFile(mContext, originalFile);
+                    fileDeleteResult = FileStorageUtils.deleteImageFile(mContext, originalFile);
                     break;
                 case FileUploader.FILE_TYPE_VIDEO:
-                    fileDelteResult = FileStorageUtils.deleteVideoFile(mContext, originalFile);
+                    fileDeleteResult = FileStorageUtils.deleteVideoFile(mContext, originalFile);
                     break;
                 default:
-                    fileDelteResult = originalFile.delete();
+                    fileDeleteResult = originalFile.delete();
                     break;
             }
 
-            if(fileDelteResult) {
+            if(fileDeleteResult) {
                 Log.wtf(TAG, "Deleted instantly uploaded file: " + originalFile.getAbsolutePath());
             } else {
                 Log.wtf(TAG, "Failed to delete instantly uploaded file: " + originalFile.getAbsolutePath());
