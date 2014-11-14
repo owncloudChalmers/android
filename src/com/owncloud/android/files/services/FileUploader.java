@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentMap;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountsException;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -178,11 +179,13 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
         if (!intent.hasExtra(KEY_ACCOUNT) || !intent.hasExtra(KEY_UPLOAD_TYPE)
                 || !(intent.hasExtra(KEY_LOCAL_FILE) || intent.hasExtra(KEY_FILE))) {
             Log_OC.e(TAG, "Not enough information provided in intent");
+            notifyUploadError();
             return Service.START_NOT_STICKY;
         }
         int uploadType = intent.getIntExtra(KEY_UPLOAD_TYPE, -1);
         if (uploadType == -1) {
             Log_OC.e(TAG, "Incorrect upload type provided");
+            notifyUploadError();
             return Service.START_NOT_STICKY;
         }
         Account account = intent.getParcelableExtra(KEY_ACCOUNT);
@@ -228,19 +231,23 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
         
         if (intent.hasExtra(KEY_FILE) && files == null) {
             Log_OC.e(TAG, "Incorrect array for OCFiles provided in upload intent");
+            notifyUploadError();
             return Service.START_NOT_STICKY;
 
         } else if (!intent.hasExtra(KEY_FILE)) {
             if (localPaths == null) {
                 Log_OC.e(TAG, "Incorrect array for local paths provided in upload intent");
+                notifyUploadError();
                 return Service.START_NOT_STICKY;
             }
             if (remotePaths == null) {
                 Log_OC.e(TAG, "Incorrect array for remote paths provided in upload intent");
+                notifyUploadError();
                 return Service.START_NOT_STICKY;
             }
             if (localPaths.length != remotePaths.length) {
                 Log_OC.e(TAG, "Different number of remote paths and local paths!");
+                notifyUploadError();
                 return Service.START_NOT_STICKY;
             }
 
@@ -248,8 +255,9 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
             for (int i = 0; i < localPaths.length; i++) {
                 files[i] = obtainNewOCFileToUpload(remotePaths[i], localPaths[i], ((mimeTypes != null) ? mimeTypes[i]
                         : (String) null), storageManager);
-                if (files[i] == null) {
+                if (files[i] == null || !files[i].fileExists()) {
                     // TODO @andomaex add failure Notification
+                    notifyUploadError();
                     return Service.START_NOT_STICKY;
                 }
             }
@@ -280,14 +288,17 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
 
         } catch (IllegalArgumentException e) {
             Log_OC.e(TAG, "Not enough information provided in intent: " + e.getMessage());
+            notifyUploadError();
             return START_NOT_STICKY;
 
         } catch (IllegalStateException e) {
             Log_OC.e(TAG, "Bad information provided in intent: " + e.getMessage());
+            notifyUploadError();
             return START_NOT_STICKY;
 
         } catch (Exception e) {
             Log_OC.e(TAG, "Unexpected exception while processing upload intent", e);
+            notifyUploadError();
             return START_NOT_STICKY;
 
         }
@@ -675,6 +686,22 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
 
         return newFile;
     }
+
+
+
+    private void notifyUploadError(){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setTicker(getString(R.string.uploader_upload_failed_ticker))
+                .setContentTitle(getString(R.string.uploader_upload_failed_ticker))
+                .setContentText(getString(R.string.uploader_upload_failed_ticker))
+                .setAutoCancel(false)
+                .setOngoing(false);
+        mNotificationManager.notify(R.string.uploader_upload_failed_ticker, builder.build());
+    }
+
+
+
 
     /**
      * Creates a status notification to show the upload progress
