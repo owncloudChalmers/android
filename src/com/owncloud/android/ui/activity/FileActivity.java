@@ -117,6 +117,8 @@ implements OnRemoteOperationListener, ComponentsGetter {
     protected FileUploaderBinder mUploaderBinder = null;
     private ServiceConnection mDownloadServiceConnection, mUploadServiceConnection = null;
     
+    private int mWaitingOperations = 0;
+    
     
     /**
      * Loads the ownCloud {@link Account} and main {@link OCFile} to be handled by the instance of 
@@ -521,10 +523,14 @@ implements OnRemoteOperationListener, ComponentsGetter {
      */
     public void showLoadingDialog() {
         // Construct dialog
-        LoadingDialog loading = new LoadingDialog(getResources().getString(R.string.wait_a_moment));
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        loading.show(ft, DIALOG_WAIT_TAG);
+        if(mWaitingOperations == 0) {
+            LoadingDialog loading = new LoadingDialog(getResources().getString(R.string.wait_a_moment));
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            loading.show(ft, DIALOG_WAIT_TAG);
+        }
+        mWaitingOperations++;
+        
         
     }
 
@@ -533,6 +539,8 @@ implements OnRemoteOperationListener, ComponentsGetter {
      * Dismiss loading dialog
      */
     public void dismissLoadingDialog(){
+        if(mWaitingOperations > 1)
+            mWaitingOperations--;
         Fragment frag = getSupportFragmentManager().findFragmentByTag(DIALOG_WAIT_TAG);
         if (frag != null) {
             LoadingDialog loading = (LoadingDialog) frag;

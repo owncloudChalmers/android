@@ -18,6 +18,7 @@
 package com.owncloud.android.ui.fragment;
 
 import java.io.File;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -298,7 +299,12 @@ public class OCFileListFragment extends ExtendedListFragment {
             }
             case R.id.action_download_file: 
             case R.id.action_sync_file: {
-                mContainerActivity.getFileOperationsHelper().syncFile(mTargetFile);
+                if (mTargetFile.isFolder()){
+                    downloadFolder(mTargetFile);
+                } else {
+                    mContainerActivity.getFileOperationsHelper().syncFile(mTargetFile);  
+                }
+                
                 return true;
             }
             case R.id.action_cancel_download:
@@ -331,6 +337,17 @@ public class OCFileListFragment extends ExtendedListFragment {
             }
             default:
                 return super.onContextItemSelected(item); 
+        }
+    }
+    
+    private void downloadFolder(OCFile folder) {
+        FileDataStorageManager storage = mContainerActivity.getStorageManager();
+        for (OCFile file : storage.getFolderContent(folder)) {
+            if (file.isFolder()) {
+                downloadFolder(file);
+            } else {
+                mContainerActivity.getFileOperationsHelper().syncFile(file);
+            }
         }
     }
 
