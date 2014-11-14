@@ -309,7 +309,12 @@ public class OCFileListFragment extends ExtendedListFragment {
             }
             case R.id.action_cancel_download:
             case R.id.action_cancel_upload: {
-                ((FileDisplayActivity)mContainerActivity).cancelTransference(mTargetFile);
+                if (mTargetFile.isFolder()) {
+                    cancelDownloadFolder(mTargetFile);
+                }
+                else {
+                    ((FileDisplayActivity)mContainerActivity).cancelTransference(mTargetFile);
+                }
                 return true;
             }
             case R.id.action_see_details: {
@@ -347,6 +352,17 @@ public class OCFileListFragment extends ExtendedListFragment {
                 downloadFolder(file);
             } else {
                 mContainerActivity.getFileOperationsHelper().syncFile(file);
+            }
+        }
+    }
+    
+    private void cancelDownloadFolder(OCFile folder) {
+        FileDataStorageManager storage = mContainerActivity.getStorageManager();
+        for (OCFile file : storage.getFolderContent(folder)) {
+            if (file.isFolder()) {
+                cancelDownloadFolder(file);
+            } else {
+                ((FileDisplayActivity)mContainerActivity).cancelTransference(file);
             }
         }
     }
