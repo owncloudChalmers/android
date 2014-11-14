@@ -117,6 +117,9 @@ implements OnRemoteOperationListener, ComponentsGetter {
     protected FileUploaderBinder mUploaderBinder = null;
     private ServiceConnection mDownloadServiceConnection, mUploadServiceConnection = null;
     
+    /** Keeps track of the number of started waiting dialogs **/
+    private int mWaitingOperations = 0;
+    
     
     /**
      * Loads the ownCloud {@link Account} and main {@link OCFile} to be handled by the instance of 
@@ -520,11 +523,16 @@ implements OnRemoteOperationListener, ComponentsGetter {
      * Show loading dialog 
      */
     public void showLoadingDialog() {
-        // Construct dialog
-        LoadingDialog loading = new LoadingDialog(getResources().getString(R.string.wait_a_moment));
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        loading.show(ft, DIALOG_WAIT_TAG);
+        // Construct dialog if the dialog is not already shown
+        if(mWaitingOperations == 0) {
+            LoadingDialog loading = new LoadingDialog(getResources().getString(R.string.wait_a_moment));
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            loading.show(ft, DIALOG_WAIT_TAG);
+        }
+        //increment the number of waiting operations
+        mWaitingOperations++;
+        
         
     }
 
@@ -533,10 +541,17 @@ implements OnRemoteOperationListener, ComponentsGetter {
      * Dismiss loading dialog
      */
     public void dismissLoadingDialog(){
-        Fragment frag = getSupportFragmentManager().findFragmentByTag(DIALOG_WAIT_TAG);
-        if (frag != null) {
-            LoadingDialog loading = (LoadingDialog) frag;
-            loading.dismiss();
+        //Decrease the number of waiting operations
+        if( mWaitingOperations > 0)
+            mWaitingOperations--;
+        
+        //If waiting operations is 0, dismiss the dialog
+        if(mWaitingOperations == 0) {
+            Fragment frag = getSupportFragmentManager().findFragmentByTag(DIALOG_WAIT_TAG);
+            if (frag != null) {
+                LoadingDialog loading = (LoadingDialog) frag;
+                loading.dismiss();
+            }
         }
     }
 

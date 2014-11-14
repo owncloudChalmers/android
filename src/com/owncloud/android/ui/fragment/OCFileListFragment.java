@@ -18,6 +18,7 @@
 package com.owncloud.android.ui.fragment;
 
 import java.io.File;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -298,12 +299,22 @@ public class OCFileListFragment extends ExtendedListFragment {
             }
             case R.id.action_download_file: 
             case R.id.action_sync_file: {
-                mContainerActivity.getFileOperationsHelper().syncFile(mTargetFile);
+                if (mTargetFile.isFolder()){
+                    downloadFolder(mTargetFile);
+                } else {
+                    mContainerActivity.getFileOperationsHelper().syncFile(mTargetFile);  
+                }
+                
                 return true;
             }
             case R.id.action_cancel_download:
             case R.id.action_cancel_upload: {
-                ((FileDisplayActivity)mContainerActivity).cancelTransference(mTargetFile);
+                if (mTargetFile.isFolder()) {
+                    cancelDownloadFolder(mTargetFile);
+                }
+                else {
+                    ((FileDisplayActivity)mContainerActivity).cancelTransference(mTargetFile);
+                }
                 return true;
             }
             case R.id.action_see_details: {
@@ -331,6 +342,30 @@ public class OCFileListFragment extends ExtendedListFragment {
             }
             default:
                 return super.onContextItemSelected(item); 
+        }
+    }
+    
+    //Recursive methods that starts a sync file operation for each file in the folder
+    private void downloadFolder(OCFile folder) {
+        FileDataStorageManager storage = mContainerActivity.getStorageManager();
+        for (OCFile file : storage.getFolderContent(folder)) {
+            if (file.isFolder()) {
+                downloadFolder(file);
+            } else {
+                mContainerActivity.getFileOperationsHelper().syncFile(file);
+            }
+        }
+    }
+    
+    //Recursive methods that cancels sync file operation for each file in the folder
+    private void cancelDownloadFolder(OCFile folder) {
+        FileDataStorageManager storage = mContainerActivity.getStorageManager();
+        for (OCFile file : storage.getFolderContent(folder)) {
+            if (file.isFolder()) {
+                cancelDownloadFolder(file);
+            } else {
+                ((FileDisplayActivity)mContainerActivity).cancelTransference(file);
+            }
         }
     }
 
