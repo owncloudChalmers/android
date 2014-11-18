@@ -345,6 +345,7 @@ public class OCFileListFragment extends ExtendedListFragment {
         }
     }
     
+    //Recursive methods that starts a sync file operation for each file in the folder
     private void downloadFolder(OCFile folder) {
         FileDataStorageManager storage = mContainerActivity.getStorageManager();
         for (OCFile file : storage.getFolderContent(folder)) {
@@ -356,6 +357,7 @@ public class OCFileListFragment extends ExtendedListFragment {
         }
     }
     
+    //Recursive methods that cancels sync file operation for each file in the folder
     private void cancelDownloadFolder(OCFile folder) {
         FileDataStorageManager storage = mContainerActivity.getStorageManager();
         for (OCFile file : storage.getFolderContent(folder)) {
