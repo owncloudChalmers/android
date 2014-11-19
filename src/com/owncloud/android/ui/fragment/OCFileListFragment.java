@@ -298,6 +298,9 @@ public class OCFileListFragment extends ExtendedListFragment {
             }
             case R.id.action_download_file: 
             case R.id.action_sync_file: {
+                if(mTargetFile.isFolder()){
+                    //mTargetFile.get
+                }
                 mContainerActivity.getFileOperationsHelper().syncFile(mTargetFile);
                 return true;
             }

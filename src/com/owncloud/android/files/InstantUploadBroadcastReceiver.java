@@ -164,7 +164,6 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
                 File f = new File(file_path);
                 if (f.exists()) {
                     Account account = new Account(account_name, MainApp.getAccountType());
-
                     String mimeType = null;
                     try {
                         mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
@@ -176,22 +175,33 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
                     if (mimeType == null)
                         mimeType = "application/octet-stream";
 
-                    Intent i = new Intent(context, FileUploader.class);
-                    i.putExtra(FileUploader.KEY_ACCOUNT, account);
-                    i.putExtra(FileUploader.KEY_LOCAL_FILE, file_path);
-                    i.putExtra(FileUploader.KEY_REMOTE_FILE, FileStorageUtils.getInstantUploadFilePath(context, f.getName()));
-                    i.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_SINGLE_FILE);
-                    i.putExtra(FileUploader.KEY_MIME_TYPE, mimeType);
-                    i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
+                    boolean uploadImage = mimeType.startsWith("image/")
+                            && instantPictureUploadEnabled(context)
+                            && (isConnectedViaWiFi(context) || instantPictureUploadViaWiFiOnly(context) == false);
 
-                    // Intent information indicating that no local files should be stored
-                    SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(context);
-                    if(pm.getBoolean("instant_upload_no_local", false)){
-                        i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, true);
-                        i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
+                    boolean uploadVideo = mimeType.startsWith("video/")
+                            && instantVideoUploadEnabled(context)
+                            && (isConnectedViaWiFi(context) || instantVideoUploadViaWiFiOnly(context) == false);
+
+                    if (uploadImage || uploadVideo) {
+                        Intent i = new Intent(context, FileUploader.class);
+                        i.putExtra(FileUploader.KEY_ACCOUNT, account);
+                        i.putExtra(FileUploader.KEY_LOCAL_FILE, file_path);
+                        i.putExtra(FileUploader.KEY_REMOTE_FILE, FileStorageUtils.getInstantUploadFilePath(context, f.getName()));
+                        i.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_SINGLE_FILE);
+                        i.putExtra(FileUploader.KEY_MIME_TYPE, mimeType);
+                        i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
+
+                        // Intent information indicating that no local files should be stored
+                        SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(context);
+                        if(pm.getBoolean("instant_upload_no_local", false)){
+                            i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, true);
+                            i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
+                        }
+
+                        context.startService(i);
                     }
 
-                    context.startService(i);
                 } else {
                     Log_OC.w(TAG, "Instant upload file " + f.getAbsolutePath() + " don't exist anymore");
                 }

@@ -59,6 +59,7 @@ public class DbHandler {
         cv.put("account", account);
         cv.put("attempt", UPLOAD_STATUS_UPLOAD_LATER);
         cv.put("message", message);
+        cv.put("isInstant", isInstant);
         long result = mDB.insert(TABLE_INSTANT_UPLOAD, null, cv);
         Log_OC.d(TABLE_INSTANT_UPLOAD, "putFileForLater returns with: " + result + " for file: " + filepath);
         return result != -1;
