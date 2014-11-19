@@ -17,25 +17,24 @@
 
 package com.owncloud.android.utils;
 
-import java.io.File;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.StatFs;
+import android.preference.PreferenceManager;
 
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.resources.files.RemoteFile;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.net.Uri;
-import android.os.Environment;
-import android.os.StatFs;
-
+import java.io.File;
 
 /**
  * Static methods to help in access to local file system.
- * 
+ *
  * @author David A. Velasco
  */
 public class FileStorageUtils {
@@ -54,7 +53,7 @@ public class FileStorageUtils {
     public static final String getTemporalPath(String accountName) {
         File sdCard = Environment.getExternalStorageDirectory();
         return sdCard.getAbsolutePath() + "/" + MainApp.getDataFolder() + "/tmp/" + Uri.encode(accountName, "@");
-            // URL encoding is an 'easy fix' to overcome that NTFS and FAT32 don't allow ":" in file names, that can be in the accountName since 0.1.190B
+        // URL encoding is an 'easy fix' to overcome that NTFS and FAT32 don't allow ":" in file names, that can be in the accountName since 0.1.190B
     }
 
     @SuppressLint("NewApi")
@@ -69,8 +68,8 @@ public class FileStorageUtils {
         }
 
     }
-    
-    public static final String getLogPath()  {
+
+    public static final String getLogPath() {
         return Environment.getExternalStorageDirectory() + File.separator + MainApp.getDataFolder() + File.separator + "log";
     }
 
@@ -78,21 +77,21 @@ public class FileStorageUtils {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         String uploadPathdef = context.getString(R.string.instant_upload_path);
         String uploadPath = pref.getString("instant_upload_path", uploadPathdef);
-        String value = uploadPath + OCFile.PATH_SEPARATOR +  (fileName == null ? "" : fileName);
+        String value = uploadPath + OCFile.PATH_SEPARATOR + (fileName == null ? "" : fileName);
         return value;
     }
-    
+
     public static String getParentPath(String remotePath) {
         String parentPath = new File(remotePath).getParent();
         parentPath = parentPath.endsWith(OCFile.PATH_SEPARATOR) ? parentPath : parentPath + OCFile.PATH_SEPARATOR;
         return parentPath;
     }
-    
+
     /**
      * Creates and populates a new {@link OCFile} object with the data read from the server.
-     * 
-     * @param remote    remote file read from the server (remote file or folder).
-     * @return          New OCFile instance representing the remote resource described by we.
+     *
+     * @param remote remote file read from the server (remote file or folder).
+     * @return New OCFile instance representing the remote resource described by we.
      */
     public static OCFile fillOCFile(RemoteFile remote) {
         OCFile file = new OCFile(remote.getRemotePath());
@@ -105,14 +104,14 @@ public class FileStorageUtils {
         file.setRemoteId(remote.getRemoteId());
         return file;
     }
-    
+
     /**
      * Creates and populates a new {@link RemoteFile} object with the data read from an {@link OCFile}.
-     * 
-     * @param oCFile    OCFile 
-     * @return          New RemoteFile instance representing the resource described by ocFile.
+     *
+     * @param oCFile OCFile
+     * @return New RemoteFile instance representing the resource described by ocFile.
      */
-    public static RemoteFile fillRemoteFile(OCFile ocFile){
+    public static RemoteFile fillRemoteFile(OCFile ocFile) {
         RemoteFile file = new RemoteFile(ocFile.getRemotePath());
         file.setCreationTimestamp(ocFile.getCreationTimestamp());
         file.setLength(ocFile.getFileLength());
@@ -123,5 +122,5 @@ public class FileStorageUtils {
         file.setRemoteId(ocFile.getRemoteId());
         return file;
     }
-  
+
 }

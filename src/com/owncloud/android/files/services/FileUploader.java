@@ -18,16 +18,6 @@
 
 package com.owncloud.android.files.services;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.AbstractList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountsException;
@@ -73,6 +63,16 @@ import com.owncloud.android.operations.common.SyncOperation;
 import com.owncloud.android.ui.activity.FileActivity;
 import com.owncloud.android.ui.activity.FileDisplayActivity;
 import com.owncloud.android.utils.ErrorMessageAdapter;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.AbstractList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 

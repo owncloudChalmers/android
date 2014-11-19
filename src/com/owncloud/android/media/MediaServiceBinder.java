@@ -17,25 +17,24 @@
 
 package com.owncloud.android.media;
 
-
-import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.lib.common.utils.Log_OC;
-import com.owncloud.android.media.MediaService.State;
-
 import android.accounts.Account;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.widget.MediaController;
 
+import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.media.MediaService.State;
+
 
 /**
- *  Binder allowing client components to perform operations on on the MediaPlayer managed by a MediaService instance.
- * 
- *  Provides the operations of {@link MediaController.MediaPlayerControl}, and an extra method to check if
- *  an {@link OCFile} instance is handled by the MediaService.
- *  
- *  @author David A. Velasco
+ * Binder allowing client components to perform operations on on the MediaPlayer managed by a MediaService instance.
+ * <p/>
+ * Provides the operations of {@link MediaController.MediaPlayerControl}, and an extra method to check if
+ * an {@link OCFile} instance is handled by the MediaService.
+ *
+ * @author David A. Velasco
  */
 public class MediaServiceBinder extends Binder implements MediaController.MediaPlayerControl {
 
@@ -44,11 +43,11 @@ public class MediaServiceBinder extends Binder implements MediaController.MediaP
      * {@link MediaService} instance to access with the binder
      */
     private MediaService mService = null;
-    
+
     /**
      * Public constructor
-     * 
-     * @param service       A {@link MediaService} instance to access with the binder 
+     *
+     * @param service A {@link MediaService} instance to access with the binder
      */
     public MediaServiceBinder(MediaService service) {
         if (service == null) {
@@ -56,13 +55,13 @@ public class MediaServiceBinder extends Binder implements MediaController.MediaP
         }
         mService = service;
     }
-    
-    
+
+
     public boolean isPlaying(OCFile mFile) {
-        return (mFile != null && mFile.equals(mService.getCurrentFile())); 
+        return (mFile != null && mFile.equals(mService.getCurrentFile()));
     }
 
-    
+
     @Override
     public boolean canPause() {
         return true;
@@ -111,10 +110,10 @@ public class MediaServiceBinder extends Binder implements MediaController.MediaP
         }
     }
 
-    
+
     /**
      * Reports if the MediaService is playing a file or not.
-     * 
+     * <p/>
      * Considers that the file is being played when it is in preparation because the expected
      * client of this method is a {@link MediaController} , and we do not want that the 'play'
      * button is shown when the file is being prepared by the MediaService.
@@ -125,7 +124,7 @@ public class MediaServiceBinder extends Binder implements MediaController.MediaP
         return (currentState == State.PLAYING || (currentState == State.PREPARING && mService.mPlayOnPrepared));
     }
 
-    
+
     @Override
     public void pause() {
         Log_OC.d(TAG, "Pausing through binder...");
@@ -147,7 +146,7 @@ public class MediaServiceBinder extends Binder implements MediaController.MediaP
         Log_OC.d(TAG, "Starting through binder...");
         mService.processPlayRequest();  // this will finish the service if there is no file preloaded to play
     }
-    
+
     public void start(Account account, OCFile file, boolean playImmediately, int position) {
         Log_OC.d(TAG, "Loading and starting through binder...");
         Intent i = new Intent(mService, MediaService.class);
@@ -163,12 +162,12 @@ public class MediaServiceBinder extends Binder implements MediaController.MediaP
     public void registerMediaController(MediaControlView mediaController) {
         mService.setMediaContoller(mediaController);
     }
-    
+
     public void unregisterMediaController(MediaControlView mediaController) {
         if (mediaController != null && mediaController == mService.getMediaController()) {
             mService.setMediaContoller(null);
         }
-        
+
     }
 
     public boolean isInPlaybackState() {

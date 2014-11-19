@@ -16,14 +16,6 @@
  */
 package com.owncloud.android.ui.preview;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
-
 import android.accounts.Account;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -55,15 +47,22 @@ import com.owncloud.android.ui.dialog.RemoveFileDialogFragment;
 import com.owncloud.android.ui.fragment.FileFragment;
 import com.owncloud.android.utils.TouchImageViewCustom;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
 
 
 /**
  * This fragment shows a preview of a downloaded image.
- * 
+ * <p/>
  * Trying to get an instance with NULL {@link OCFile} or ownCloud {@link Account} values will produce an {@link IllegalStateException}.
- * 
+ * <p/>
  * If the {@link OCFile} passed is not downloaded, an {@link IllegalStateException} is generated on instantiation too.
- * 
+ *
  * @author David A. Velasco
  */
 public class PreviewImageFragment extends FileFragment {
@@ -78,42 +77,42 @@ public class PreviewImageFragment extends FileFragment {
     private ProgressBar mProgressWheel;
 
     public Bitmap mBitmap = null;
-    
+
     private static final String TAG = PreviewImageFragment.class.getSimpleName();
 
     private boolean mIgnoreFirstSavedState;
 
-    
+
     /**
      * Creates a fragment to preview an image.
-     * 
+     * <p/>
      * When 'imageFile' or 'ocAccount' are null
-     * 
-     * @param imageFile                 An {@link OCFile} to preview as an image in the fragment
-     * @param ocAccount                 An ownCloud account; needed to start downloads
-     * @param ignoreFirstSavedState     Flag to work around an unexpected behaviour of {@link FragmentStatePagerAdapter}; TODO better solution 
+     *
+     * @param fileToDetail          An {@link OCFile} to preview as an image in the fragment
+     * @param ocAccount             An ownCloud account; needed to start downloads
+     * @param ignoreFirstSavedState Flag to work around an unexpected behaviour of {@link FragmentStatePagerAdapter}; TODO better solution
      */
     public PreviewImageFragment(OCFile fileToDetail, Account ocAccount, boolean ignoreFirstSavedState) {
         super(fileToDetail);
         mAccount = ocAccount;
         mIgnoreFirstSavedState = ignoreFirstSavedState;
     }
-    
-    
+
+
     /**
-     *  Creates an empty fragment for image previews.
-     * 
-     *  MUST BE KEPT: the system uses it when tries to reinstantiate a fragment automatically (for instance, when the device is turned a aside).
-     * 
-     *  DO NOT CALL IT: an {@link OCFile} and {@link Account} must be provided for a successful construction 
+     * Creates an empty fragment for image previews.
+     * <p/>
+     * MUST BE KEPT: the system uses it when tries to reinstantiate a fragment automatically (for instance, when the device is turned a aside).
+     * <p/>
+     * DO NOT CALL IT: an {@link OCFile} and {@link Account} must be provided for a successful construction
      */
     public PreviewImageFragment() {
         super();
         mAccount = null;
         mIgnoreFirstSavedState = false;
     }
-    
-    
+
+
     /**
      * {@inheritDoc}
      */
@@ -122,14 +121,14 @@ public class PreviewImageFragment extends FileFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
-    
+
 
     /**
      * {@inheritDoc}
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         mView = inflater.inflate(R.layout.preview_image_fragment, container, false);
         mImageView = (TouchImageViewCustom) mView.findViewById(R.id.image);
@@ -141,9 +140,9 @@ public class PreviewImageFragment extends FileFragment {
             }
 
         });
-        mMessageView = (TextView)mView.findViewById(R.id.message);
+        mMessageView = (TextView) mView.findViewById(R.id.message);
         mMessageView.setVisibility(View.GONE);
-        mProgressWheel = (ProgressBar)mView.findViewById(R.id.progressWheel);
+        mProgressWheel = (ProgressBar) mView.findViewById(R.id.progressWheel);
         mProgressWheel.setVisibility(View.VISIBLE);
         return mView;
     }
@@ -156,7 +155,7 @@ public class PreviewImageFragment extends FileFragment {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
             if (!mIgnoreFirstSavedState) {
-                OCFile file = (OCFile)savedInstanceState.getParcelable(PreviewImageFragment.EXTRA_FILE);
+                OCFile file = (OCFile) savedInstanceState.getParcelable(PreviewImageFragment.EXTRA_FILE);
                 setFile(file);
                 mAccount = savedInstanceState.getParcelable(PreviewImageFragment.EXTRA_ACCOUNT);
             } else {
@@ -173,7 +172,7 @@ public class PreviewImageFragment extends FileFragment {
             throw new IllegalStateException("There is no local file to preview");
         }
     }
-        
+
 
     /**
      * {@inheritDoc}
@@ -184,18 +183,18 @@ public class PreviewImageFragment extends FileFragment {
         outState.putParcelable(PreviewImageFragment.EXTRA_FILE, getFile());
         outState.putParcelable(PreviewImageFragment.EXTRA_ACCOUNT, mAccount);
     }
-    
+
 
     @Override
     public void onStart() {
         super.onStart();
         if (getFile() != null) {
-           BitmapLoader bl = new BitmapLoader(mImageView, mMessageView, mProgressWheel);
-           bl.execute(new String[]{getFile().getStoragePath()});
+            BitmapLoader bl = new BitmapLoader(mImageView, mMessageView, mProgressWheel);
+            bl.execute(new String[]{getFile().getStoragePath()});
         }
     }
-    
-    
+
+
     /**
      * {@inheritDoc}
      */
@@ -211,20 +210,20 @@ public class PreviewImageFragment extends FileFragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        
+
         if (mContainerActivity.getStorageManager() != null) {
             // Update the file
             setFile(mContainerActivity.getStorageManager().getFileById(getFile().getFileId()));
-            
+
             FileMenuFilter mf = new FileMenuFilter(
-                getFile(),
-                mContainerActivity.getStorageManager().getAccount(),
-                mContainerActivity,
-                getSherlockActivity()
+                    getFile(),
+                    mContainerActivity.getStorageManager().getAccount(),
+                    mContainerActivity,
+                    getSherlockActivity()
             );
             mf.filter(menu);
         }
-        
+
         // additional restriction for this fragment 
         // TODO allow renaming in PreviewImageFragment
         MenuItem item = menu.findItem(R.id.action_rename_file);
@@ -232,7 +231,7 @@ public class PreviewImageFragment extends FileFragment {
             item.setVisible(false);
             item.setEnabled(false);
         }
-        
+
         // additional restriction for this fragment 
         // TODO allow refresh file in PreviewImageFragment
         item = menu.findItem(R.id.action_sync_file);
@@ -247,55 +246,46 @@ public class PreviewImageFragment extends FileFragment {
             item.setVisible(false);
             item.setEnabled(false);
         }
-        
+
     }
 
-    
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_share_file: {
-                mContainerActivity.getFileOperationsHelper().shareFileWithLink(getFile());
-                return true;
-            }
-            case R.id.action_unshare_file: {
-                mContainerActivity.getFileOperationsHelper().unshareFileWithLink(getFile());
-                return true;
-            }
-            case R.id.action_open_file_with: {
-                openFile();
-                return true;
-            }
-            case R.id.action_remove_file: {
-                RemoveFileDialogFragment dialog = RemoveFileDialogFragment.newInstance(getFile());
-                dialog.show(getFragmentManager(), ConfirmationDialogFragment.FTAG_CONFIRMATION);
-                return true;
-            }
-            case R.id.action_see_details: {
-                seeDetails();
-                return true;
-            }
-            case R.id.action_send_file: {
-                mContainerActivity.getFileOperationsHelper().sendDownloadedFile(getFile());
-                return true;
-            }
-            case R.id.action_sync_file: {
-                mContainerActivity.getFileOperationsHelper().syncFile(getFile());
-                return true;
-            }
-            
-            default:
-                return false;
+        int i = item.getItemId();
+        if (i == R.id.action_share_file) {
+            mContainerActivity.getFileOperationsHelper().shareFileWithLink(getFile());
+            return true;
+        } else if (i == R.id.action_unshare_file) {
+            mContainerActivity.getFileOperationsHelper().unshareFileWithLink(getFile());
+            return true;
+        } else if (i == R.id.action_open_file_with) {
+            openFile();
+            return true;
+        } else if (i == R.id.action_remove_file) {
+            RemoveFileDialogFragment dialog = RemoveFileDialogFragment.newInstance(getFile());
+            dialog.show(getFragmentManager(), ConfirmationDialogFragment.FTAG_CONFIRMATION);
+            return true;
+        } else if (i == R.id.action_see_details) {
+            seeDetails();
+            return true;
+        } else if (i == R.id.action_send_file) {
+            mContainerActivity.getFileOperationsHelper().sendDownloadedFile(getFile());
+            return true;
+        } else if (i == R.id.action_sync_file) {
+            mContainerActivity.getFileOperationsHelper().syncFile(getFile());
+            return true;
+        } else {
+            return false;
         }
     }
-    
+
 
     private void seeDetails() {
-        mContainerActivity.showDetails(getFile());        
+        mContainerActivity.showDetails(getFile());
     }
 
 
@@ -319,7 +309,7 @@ public class PreviewImageFragment extends FileFragment {
         super.onDestroy();
     }
 
-    
+
     /**
      * Opens the previewed image with an external application.
      */
@@ -327,51 +317,51 @@ public class PreviewImageFragment extends FileFragment {
         mContainerActivity.getFileOperationsHelper().openFile(getFile());
         finish();
     }
-    
-    
+
+
     private class BitmapLoader extends AsyncTask<String, Void, Bitmap> {
 
         /**
          * Weak reference to the target {@link ImageView} where the bitmap will be loaded into.
-         * 
+         * <p/>
          * Using a weak reference will avoid memory leaks if the target ImageView is retired from memory before the load finishes.
          */
         private final WeakReference<ImageViewCustom> mImageViewRef;
 
         /**
          * Weak reference to the target {@link TextView} where error messages will be written.
-         * 
+         * <p/>
          * Using a weak reference will avoid memory leaks if the target ImageView is retired from memory before the load finishes.
          */
         private final WeakReference<TextView> mMessageViewRef;
 
-        
+
         /**
-         * Weak reference to the target {@link Progressbar} shown while the load is in progress.
-         * 
+         * Weak reference to the target {@link ProgressBar} shown while the load is in progress.
+         * <p/>
          * Using a weak reference will avoid memory leaks if the target ImageView is retired from memory before the load finishes.
          */
         private final WeakReference<ProgressBar> mProgressWheelRef;
 
-        
+
         /**
-         * Error message to show when a load fails 
+         * Error message to show when a load fails
          */
         private int mErrorMessageId;
-        
-        
+
+
         /**
          * Constructor.
-         * 
-         * @param imageView     Target {@link ImageView} where the bitmap will be loaded into.
+         *
+         * @param imageView Target {@link ImageView} where the bitmap will be loaded into.
          */
         public BitmapLoader(ImageViewCustom imageView, TextView messageView, ProgressBar progressWheel) {
             mImageViewRef = new WeakReference<ImageViewCustom>(imageView);
             mMessageViewRef = new WeakReference<TextView>(messageView);
             mProgressWheelRef = new WeakReference<ProgressBar>(progressWheel);
         }
-        
-        
+
+
         @Override
         protected Bitmap doInBackground(String... params) {
             Bitmap result = null;
@@ -391,7 +381,7 @@ public class PreviewImageFragment extends FileFragment {
                     mErrorMessageId = R.string.preview_image_error_unknown_format;
                     Log_OC.e(TAG, "File could not be loaded as a bitmap: " + storagePath);
                 }
-                
+
             } catch (OutOfMemoryError e) {
                 Log_OC.e(TAG, "Out of memory occured for file " + storagePath, e);
 
@@ -402,19 +392,19 @@ public class PreviewImageFragment extends FileFragment {
                     mErrorMessageId = R.string.preview_image_error_unknown_format;
                     Log_OC.e(TAG, "File could not be loaded as a bitmap: " + storagePath);
                 }
-                    
+
             } catch (NoSuchFieldError e) {
                 mErrorMessageId = R.string.common_error_unknown;
                 Log_OC.e(TAG, "Error from access to unexisting field despite protection; file " + storagePath, e);
-                    
+
             } catch (Throwable t) {
                 mErrorMessageId = R.string.common_error_unknown;
                 Log_OC.e(TAG, "Unexpected error loading " + getFile().getStoragePath(), t);
-                
+
             }
             return result;
         }
-        
+
         @Override
         protected void onPostExecute(Bitmap result) {
             hideProgressWheel();
@@ -433,7 +423,7 @@ public class PreviewImageFragment extends FileFragment {
                     imageView.setBitmap(result);
                     imageView.setImageBitmap(result);
                     imageView.setVisibility(View.VISIBLE);
-                    mBitmap  = result;
+                    mBitmap = result;
                 } // else , silently finish, the fragment was destroyed
             }
             if (mMessageViewRef != null) {
@@ -443,7 +433,7 @@ public class PreviewImageFragment extends FileFragment {
                 } // else , silently finish, the fragment was destroyed
             }
         }
-        
+
         private void showErrorMessage() {
             if (mImageViewRef != null) {
                 final ImageView imageView = mImageViewRef.get();
@@ -460,7 +450,7 @@ public class PreviewImageFragment extends FileFragment {
                 } // else , silently finish, the fragment was destroyed
             }
         }
-        
+
         private void hideProgressWheel() {
             if (mProgressWheelRef != null) {
                 final ProgressBar progressWheel = mProgressWheelRef.get();
@@ -469,20 +459,20 @@ public class PreviewImageFragment extends FileFragment {
                 }
             }
         }
-        
+
     }
 
     /**
      * Helper method to test if an {@link OCFile} can be passed to a {@link PreviewImageFragment} to be previewed.
-     * 
-     * @param file      File to test if can be previewed.
-     * @return          'True' if the file can be handled by the fragment.
+     *
+     * @param file File to test if can be previewed.
+     * @return 'True' if the file can be handled by the fragment.
      */
     public static boolean canBePreviewed(OCFile file) {
         return (file != null && file.isImage());
     }
 
-    
+
     /**
      * Finishes the preview
      */
@@ -490,14 +480,14 @@ public class PreviewImageFragment extends FileFragment {
         Activity container = getActivity();
         container.finish();
     }
-    
+
     public TouchImageViewCustom getImageView() {
         return mImageView;
     }
 
     static class FlushedInputStream extends FilterInputStream {
         public FlushedInputStream(InputStream inputStream) {
-        super(inputStream);
+            super(inputStream);
         }
 
         @Override
@@ -506,14 +496,14 @@ public class PreviewImageFragment extends FileFragment {
             while (totalBytesSkipped < n) {
                 long bytesSkipped = in.skip(n - totalBytesSkipped);
                 if (bytesSkipped == 0L) {
-                      int byteValue = read();
-                      if (byteValue < 0) {
-                          break;  // we reached EOF
-                      } else {
-                          bytesSkipped = 1; // we read one byte
-                      }
-               }
-               totalBytesSkipped += bytesSkipped;
+                    int byteValue = read();
+                    if (byteValue < 0) {
+                        break;  // we reached EOF
+                    } else {
+                        bytesSkipped = 1; // we read one byte
+                    }
+                }
+                totalBytesSkipped += bytesSkipped;
             }
             return totalBytesSkipped;
         }
@@ -521,6 +511,7 @@ public class PreviewImageFragment extends FileFragment {
 
     /**
      * Load image scaled
+     *
      * @param storagePath: path of the image
      * @return Bitmap
      */
@@ -562,10 +553,10 @@ public class PreviewImageFragment extends FileFragment {
 
         if (width > screenWidth) {
             // second try to scale down the image , this time depending upon the screen size 
-            scale = (int) Math.floor((float)width / screenWidth);
+            scale = (int) Math.floor((float) width / screenWidth);
         }
         if (height > screenHeight) {
-            scale = Math.max(scale, (int) Math.floor((float)height / screenHeight));
+            scale = Math.max(scale, (int) Math.floor((float) height / screenHeight));
         }
         options.inSampleSize = scale;
 

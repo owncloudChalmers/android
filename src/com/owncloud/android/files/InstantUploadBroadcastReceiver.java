@@ -18,16 +18,6 @@
 
 package com.owncloud.android.files;
 
-import java.io.File;
-
-import com.owncloud.android.MainApp;
-import com.owncloud.android.authentication.AccountUtils;
-import com.owncloud.android.db.DbHandler;
-import com.owncloud.android.files.services.FileUploader;
-import com.owncloud.android.lib.common.utils.Log_OC;
-import com.owncloud.android.utils.FileStorageUtils;
-
-
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,6 +29,15 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
 import android.webkit.MimeTypeMap;
+
+import com.owncloud.android.MainApp;
+import com.owncloud.android.authentication.AccountUtils;
+import com.owncloud.android.db.DbHandler;
+import com.owncloud.android.files.services.FileUploader;
+import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.utils.FileStorageUtils;
+
+import java.io.File;
 
 
 public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
@@ -58,11 +57,11 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         Log_OC.d(TAG, "Received: " + intent.getAction());
         if (intent.getAction().equals(android.net.ConnectivityManager.CONNECTIVITY_ACTION)) {
             handleConnectivityAction(context, intent);
-        }else if (intent.getAction().equals(NEW_PHOTO_ACTION_UNOFFICIAL)) {
-            handleNewPictureAction(context, intent); 
+        } else if (intent.getAction().equals(NEW_PHOTO_ACTION_UNOFFICIAL)) {
+            handleNewPictureAction(context, intent);
             Log_OC.d(TAG, "UNOFFICIAL processed: com.android.camera.NEW_PICTURE");
         } else if (intent.getAction().equals(NEW_PHOTO_ACTION)) {
-            handleNewPictureAction(context, intent); 
+            handleNewPictureAction(context, intent);
             Log_OC.d(TAG, "OFFICIAL processed: android.hardware.action.NEW_PICTURE");
         } else if (intent.getAction().equals(NEW_VIDEO_ACTION)) {
             Log_OC.d(TAG, "OFFICIAL processed: android.hardware.action.NEW_VIDEO");
@@ -79,7 +78,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         String mime_type = null;
 
         Log_OC.w(TAG, "New photo received");
-        
+
         if (!instantPictureUploadEnabled(context)) {
             Log_OC.d(TAG, "Instant picture upload disabled, ignoring new picture");
             return;
@@ -91,7 +90,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE };
+        String[] CONTENT_PROJECTION = {Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE};
         c = context.getContentResolver().query(intent.getData(), CONTENT_PROJECTION, null, null, null);
         if (!c.moveToFirst()) {
             Log_OC.e(TAG, "Couldn't resolve given uri: " + intent.getDataString());
@@ -101,7 +100,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME));
         mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE));
         c.close();
-        
+
         Log_OC.d(TAG, file_path + "");
 
         // save always temporally the picture to upload
@@ -130,7 +129,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         String mime_type = null;
 
         Log_OC.w(TAG, "New video received");
-        
+
         if (!instantVideoUploadEnabled(context)) {
             Log_OC.d(TAG, "Instant video upload disabled, ignoring new video");
             return;
@@ -142,12 +141,12 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        String[] CONTENT_PROJECTION = { Video.Media.DATA, Video.Media.DISPLAY_NAME, Video.Media.MIME_TYPE, Video.Media.SIZE };
+        String[] CONTENT_PROJECTION = {Video.Media.DATA, Video.Media.DISPLAY_NAME, Video.Media.MIME_TYPE, Video.Media.SIZE};
         c = context.getContentResolver().query(intent.getData(), CONTENT_PROJECTION, null, null, null);
         if (!c.moveToFirst()) {
             Log_OC.e(TAG, "Couldn't resolve given uri: " + intent.getDataString());
             return;
-        } 
+        }
         file_path = c.getString(c.getColumnIndex(Video.Media.DATA));
         file_name = c.getString(c.getColumnIndex(Video.Media.DISPLAY_NAME));
         mime_type = c.getString(c.getColumnIndex(Video.Media.MIME_TYPE));
@@ -241,7 +240,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
     public static boolean instantPictureUploadViaWiFiOnly(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("instant_upload_on_wifi", false);
     }
-    
+
     public static boolean instantVideoUploadViaWiFiOnly(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("instant_video_upload_on_wifi", false);
     }

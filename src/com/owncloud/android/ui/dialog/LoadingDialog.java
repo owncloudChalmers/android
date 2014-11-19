@@ -16,8 +16,6 @@
  */
 package com.owncloud.android.ui.dialog;
 
-import com.owncloud.android.R;
-
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -26,6 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
+
+import com.owncloud.android.R;
 
 public class LoadingDialog extends DialogFragment {
 

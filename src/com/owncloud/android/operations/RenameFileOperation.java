@@ -17,8 +17,7 @@
 
 package com.owncloud.android.operations;
 
-import java.io.File;
-import java.io.IOException;
+import android.accounts.Account;
 
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.common.OwnCloudClient;
@@ -29,7 +28,8 @@ import com.owncloud.android.lib.resources.files.RenameRemoteFileOperation;
 import com.owncloud.android.operations.common.SyncOperation;
 import com.owncloud.android.utils.FileStorageUtils;
 
-import android.accounts.Account;
+import java.io.File;
+import java.io.IOException;
 
 
 /**

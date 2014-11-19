@@ -18,14 +18,14 @@
 
 package com.owncloud.android.operations;
 
-import java.util.ArrayList;
-
 import com.owncloud.android.lib.common.OwnCloudClient;
-import com.owncloud.android.lib.resources.shares.OCShare;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.lib.resources.shares.GetRemoteSharesForFileOperation;
+import com.owncloud.android.lib.resources.shares.OCShare;
 import com.owncloud.android.operations.common.SyncOperation;
+
+import java.util.ArrayList;
 
 /**
  * Provide a list shares for a specific file.  
@@ -48,7 +48,6 @@ public class GetSharesForFileOperation extends SyncOperation {
      * @param reshares  If set to false (default), only shares from the current user are returned
      *                  If set to true, all shares from the given file are returned
      * @param subfiles  If set to false (default), lists only the folder being shared
-     *                  If set to true, all shared files within the folder are returned.
      */
     public GetSharesForFileOperation(String path, boolean reshares, boolean subfiles) {
         mPath = path;

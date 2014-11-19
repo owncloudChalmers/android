@@ -550,6 +550,29 @@ public class FileDisplayActivity extends HookActivity implements
             }
             default:
                 retval = super.onOptionsItemSelected(item);
+                int i = item.getItemId();
+                if (i == R.id.action_create_dir) {
+                    CreateFolderDialogFragment dialog =
+                            CreateFolderDialogFragment.newInstance(getCurrentDir());
+                    dialog.show(getSupportFragmentManager(), "createdirdialog");
+                } else if (i == R.id.action_sync_account) {
+                    startSynchronization();
+                } else if (i == R.id.action_upload) {
+                    showDialog(DIALOG_CHOOSE_UPLOAD_SOURCE);
+                } else if (i == R.id.action_settings) {
+                    Intent settingsIntent = new Intent(this, Preferences.class);
+                    startActivity(settingsIntent);
+                } else if (i == android.R.id.home) {
+                    FileFragment second = getSecondFragment();
+                    OCFile currentDir = getCurrentDir();
+                    if ((currentDir != null && currentDir.getParentId() != 0) ||
+                            (second != null && second.getFile() != null)) {
+                        onBackPressed();
+
+                    }
+                } else {
+                    retval = super.onOptionsItemSelected(item);
+                }
         }
         return retval;
     }

@@ -18,10 +18,10 @@
 package com.owncloud.android.ui;
 
 import android.content.Context;
+import android.preference.CheckBoxPreference;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
-import android.preference.CheckBoxPreference;
 
 public class CheckBoxPreferenceWithLongTitle extends CheckBoxPreference{
 

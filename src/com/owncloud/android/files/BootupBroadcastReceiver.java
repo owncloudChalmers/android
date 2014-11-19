@@ -18,31 +18,31 @@
 
 package com.owncloud.android.files;
 
-import com.owncloud.android.lib.common.utils.Log_OC;
-import com.owncloud.android.services.observer.FileObserverService;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.services.observer.FileObserverService;
+
 
 /**
- * App-registered receiver catching the broadcast intent reporting that the system was 
+ * App-registered receiver catching the broadcast intent reporting that the system was
  * just boot up.
- * 
+ *
  * @author David A. Velasco
  */
 public class BootupBroadcastReceiver extends BroadcastReceiver {
 
     private static String TAG = BootupBroadcastReceiver.class.getSimpleName();
-    
+
     /**
      * Receives broadcast intent reporting that the system was just boot up.
-     *
+     * <p/>
      * Starts {@link FileObserverService} to enable observation of favourite files.
-     * 
-     * @param   context     The context where the receiver is running.
-     * @param   intent      The intent received.
+     *
+     * @param context The context where the receiver is running.
+     * @param intent  The intent received.
      */
     @Override
     public void onReceive(Context context, Intent intent) {

@@ -18,16 +18,6 @@
 
 package com.owncloud.android.providers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.owncloud.android.R;
-import com.owncloud.android.datamodel.ThumbnailsCacheManager;
-import com.owncloud.android.db.ProviderMeta;
-import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
-import com.owncloud.android.lib.common.utils.Log_OC;
-import com.owncloud.android.lib.resources.shares.ShareType;
-
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -44,12 +34,20 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.owncloud.android.R;
+import com.owncloud.android.db.ProviderMeta;
+import com.owncloud.android.db.ProviderMeta.ProviderTableMeta;
+import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.lib.resources.shares.ShareType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * The ContentProvider for the ownCloud App.
- * 
+ *
  * @author Bartek Przybylski
  * @author David A. Velasco
- * 
  */
 public class FileContentProvider extends ContentProvider {
 
@@ -57,6 +55,7 @@ public class FileContentProvider extends ContentProvider {
 
     // Projection for filelist table
     private static HashMap<String, String> mFileProjectionMap;
+
     static {
         mFileProjectionMap = new HashMap<String, String>();
         mFileProjectionMap.put(ProviderTableMeta._ID, ProviderTableMeta._ID);
@@ -86,7 +85,7 @@ public class FileContentProvider extends ContentProvider {
                 ProviderTableMeta.FILE_KEEP_IN_SYNC);
         mFileProjectionMap.put(ProviderTableMeta.FILE_ACCOUNT_OWNER,
                 ProviderTableMeta.FILE_ACCOUNT_OWNER);
-        mFileProjectionMap.put(ProviderTableMeta.FILE_ETAG, 
+        mFileProjectionMap.put(ProviderTableMeta.FILE_ETAG,
                 ProviderTableMeta.FILE_ETAG);
         mFileProjectionMap.put(ProviderTableMeta.FILE_SHARE_BY_LINK,
                 ProviderTableMeta.FILE_SHARE_BY_LINK);
@@ -106,9 +105,10 @@ public class FileContentProvider extends ContentProvider {
     private static final int SHARES = 4;
 
     private static final String TAG = FileContentProvider.class.getSimpleName();
-    
+
     // Projection for ocshares table
     private static HashMap<String, String> mOCSharesProjectionMap;
+
     static {
         mOCSharesProjectionMap = new HashMap<String, String>();
         mOCSharesProjectionMap.put(ProviderTableMeta._ID, ProviderTableMeta._ID);
@@ -141,9 +141,9 @@ public class FileContentProvider extends ContentProvider {
         mOCSharesProjectionMap.put(ProviderTableMeta.OCSHARES_ACCOUNT_OWNER,
                 ProviderTableMeta.OCSHARES_ACCOUNT_OWNER);
     }
-    
+
     private UriMatcher mUriMatcher;
-    
+
     @Override
     public int delete(Uri uri, String where, String[] whereArgs) {
         //Log_OC.d(TAG, "Deleting " + uri + " at provider " + this);
@@ -159,33 +159,33 @@ public class FileContentProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
-    
+
     private int delete(SQLiteDatabase db, Uri uri, String where, String[] whereArgs) {
         int count = 0;
         switch (mUriMatcher.match(uri)) {
-        case SINGLE_FILE:
-            Cursor c = query(db, uri, null, where, whereArgs, null);
-            String remoteId = "";
-            if (c != null && c.moveToFirst()) {
-                remoteId = c.getString(c.getColumnIndex(ProviderTableMeta.FILE_REMOTE_ID));
-                //ThumbnailsCacheManager.removeFileFromCache(remoteId);
-            }
-            Log_OC.d(TAG, "Removing FILE " + remoteId);
+            case SINGLE_FILE:
+                Cursor c = query(db, uri, null, where, whereArgs, null);
+                String remoteId = "";
+                if (c != null && c.moveToFirst()) {
+                    remoteId = c.getString(c.getColumnIndex(ProviderTableMeta.FILE_REMOTE_ID));
+                    //ThumbnailsCacheManager.removeFileFromCache(remoteId);
+                }
+                Log_OC.d(TAG, "Removing FILE " + remoteId);
 
-            count = db.delete(ProviderTableMeta.FILE_TABLE_NAME,
-                    ProviderTableMeta._ID
-                            + "="
-                            + uri.getPathSegments().get(1)
-                            + (!TextUtils.isEmpty(where) ? " AND (" + where
-                                    + ")" : ""), whereArgs);
+                count = db.delete(ProviderTableMeta.FILE_TABLE_NAME,
+                        ProviderTableMeta._ID
+                                + "="
+                                + uri.getPathSegments().get(1)
+                                + (!TextUtils.isEmpty(where) ? " AND (" + where
+                                + ")" : ""), whereArgs);
             /* just for log
             if (c!=null) {
                 c.close();
             }
             */
-            break;
-        case DIRECTORY:
-            // deletion of folder is recursive
+                break;
+            case DIRECTORY:
+                // deletion of folder is recursive
             /*
             Uri folderUri = ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_FILE, Long.parseLong(uri.getPathSegments().get(1)));
             Cursor folder = query(db, folderUri, null, null, null, null);
@@ -194,61 +194,61 @@ public class FileContentProvider extends ContentProvider {
                 folderName = folder.getString(folder.getColumnIndex(ProviderTableMeta.FILE_PATH));
             }
             */
-            Cursor children = query(uri, null, null, null, null);
-            if (children != null && children.moveToFirst())  {
-                long childId;
-                boolean isDir;
-                //String remotePath; 
-                while (!children.isAfterLast()) {
-                    childId = children.getLong(children.getColumnIndex(ProviderTableMeta._ID));
-                    isDir = "DIR".equals(children.getString(
-                            children.getColumnIndex(ProviderTableMeta.FILE_CONTENT_TYPE)
-                    ));
-                    //remotePath = children.getString(children.getColumnIndex(ProviderTableMeta.FILE_PATH));
-                    if (isDir) {
-                        count += delete(
-                            db, 
-                            ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_DIR, childId), 
-                            null, 
-                            null
-                        );
-                    } else {
-                        count += delete(
-                            db, 
-                            ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_FILE, childId),
-                            null, 
-                            null
-                        );
+                Cursor children = query(uri, null, null, null, null);
+                if (children != null && children.moveToFirst()) {
+                    long childId;
+                    boolean isDir;
+                    //String remotePath;
+                    while (!children.isAfterLast()) {
+                        childId = children.getLong(children.getColumnIndex(ProviderTableMeta._ID));
+                        isDir = "DIR".equals(children.getString(
+                                children.getColumnIndex(ProviderTableMeta.FILE_CONTENT_TYPE)
+                        ));
+                        //remotePath = children.getString(children.getColumnIndex(ProviderTableMeta.FILE_PATH));
+                        if (isDir) {
+                            count += delete(
+                                    db,
+                                    ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_DIR, childId),
+                                    null,
+                                    null
+                            );
+                        } else {
+                            count += delete(
+                                    db,
+                                    ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_FILE, childId),
+                                    null,
+                                    null
+                            );
+                        }
+                        children.moveToNext();
                     }
-                    children.moveToNext();
-                }
-                children.close();
-            } /*else {
+                    children.close();
+                } /*else {
                 Log_OC.d(TAG, "No child to remove in DIRECTORY " + folderName);
             }
             Log_OC.d(TAG, "Removing DIRECTORY " + folderName + " (or maybe not) ");
             */
-            count += db.delete(ProviderTableMeta.FILE_TABLE_NAME,
-                    ProviderTableMeta._ID
-                    + "="
-                    + uri.getPathSegments().get(1)
-                    + (!TextUtils.isEmpty(where) ? " AND (" + where
-                            + ")" : ""), whereArgs);
+                count += db.delete(ProviderTableMeta.FILE_TABLE_NAME,
+                        ProviderTableMeta._ID
+                                + "="
+                                + uri.getPathSegments().get(1)
+                                + (!TextUtils.isEmpty(where) ? " AND (" + where
+                                + ")" : ""), whereArgs);
             /* Just for log
              if (folder != null) {
                 folder.close();
             }*/
-            break;
-        case ROOT_DIRECTORY:
-            //Log_OC.d(TAG, "Removing ROOT!");
-            count = db.delete(ProviderTableMeta.FILE_TABLE_NAME, where, whereArgs);
-            break;
-        case SHARES:
-            count = db.delete(ProviderTableMeta.OCSHARES_TABLE_NAME, where, whereArgs);
-            break;
-        default:
-            //Log_OC.e(TAG, "Unknown uri " + uri);
-            throw new IllegalArgumentException("Unknown uri: " + uri.toString());
+                break;
+            case ROOT_DIRECTORY:
+                //Log_OC.d(TAG, "Removing ROOT!");
+                count = db.delete(ProviderTableMeta.FILE_TABLE_NAME, where, whereArgs);
+                break;
+            case SHARES:
+                count = db.delete(ProviderTableMeta.OCSHARES_TABLE_NAME, where, whereArgs);
+                break;
+            default:
+                //Log_OC.e(TAG, "Unknown uri " + uri);
+                throw new IllegalArgumentException("Unknown uri: " + uri.toString());
         }
         return count;
     }
@@ -256,13 +256,13 @@ public class FileContentProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (mUriMatcher.match(uri)) {
-        case ROOT_DIRECTORY:
-            return ProviderTableMeta.CONTENT_TYPE;
-        case SINGLE_FILE:
-            return ProviderTableMeta.CONTENT_TYPE_ITEM;
-        default:
-            throw new IllegalArgumentException("Unknown Uri id."
-                    + uri.toString());
+            case ROOT_DIRECTORY:
+                return ProviderTableMeta.CONTENT_TYPE;
+            case SINGLE_FILE:
+                return ProviderTableMeta.CONTENT_TYPE_ITEM;
+            default:
+                throw new IllegalArgumentException("Unknown Uri id."
+                        + uri.toString());
         }
     }
 
@@ -280,110 +280,110 @@ public class FileContentProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(newUri, null);
         return newUri;
     }
-    
+
     private Uri insert(SQLiteDatabase db, Uri uri, ContentValues values) {
-        switch (mUriMatcher.match(uri)){
-        case ROOT_DIRECTORY:
-        case SINGLE_FILE:
-            String remotePath = values.getAsString(ProviderTableMeta.FILE_PATH);
-            String accountName = values.getAsString(ProviderTableMeta.FILE_ACCOUNT_OWNER);
-            String[] projection = new String[] {
-                    ProviderTableMeta._ID, ProviderTableMeta.FILE_PATH, 
-                    ProviderTableMeta.FILE_ACCOUNT_OWNER 
-            };
-            String where = ProviderTableMeta.FILE_PATH + "=? AND " + 
-                    ProviderTableMeta.FILE_ACCOUNT_OWNER + "=?";
-            String[] whereArgs = new String[] {remotePath, accountName};
-            Cursor doubleCheck = query(db, uri, projection, where, whereArgs, null);
-            // ugly patch; serious refactorization is needed to reduce work in 
-            // FileDataStorageManager and bring it to FileContentProvider
-            if (doubleCheck == null || !doubleCheck.moveToFirst()) {     
-                long rowId = db.insert(ProviderTableMeta.FILE_TABLE_NAME, null, values);
-                if (rowId > 0) {
-                    Uri insertedFileUri = 
-                            ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_FILE, rowId);
+        switch (mUriMatcher.match(uri)) {
+            case ROOT_DIRECTORY:
+            case SINGLE_FILE:
+                String remotePath = values.getAsString(ProviderTableMeta.FILE_PATH);
+                String accountName = values.getAsString(ProviderTableMeta.FILE_ACCOUNT_OWNER);
+                String[] projection = new String[]{
+                        ProviderTableMeta._ID, ProviderTableMeta.FILE_PATH,
+                        ProviderTableMeta.FILE_ACCOUNT_OWNER
+                };
+                String where = ProviderTableMeta.FILE_PATH + "=? AND " +
+                        ProviderTableMeta.FILE_ACCOUNT_OWNER + "=?";
+                String[] whereArgs = new String[]{remotePath, accountName};
+                Cursor doubleCheck = query(db, uri, projection, where, whereArgs, null);
+                // ugly patch; serious refactorization is needed to reduce work in
+                // FileDataStorageManager and bring it to FileContentProvider
+                if (doubleCheck == null || !doubleCheck.moveToFirst()) {
+                    long rowId = db.insert(ProviderTableMeta.FILE_TABLE_NAME, null, values);
+                    if (rowId > 0) {
+                        Uri insertedFileUri =
+                                ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_FILE, rowId);
+                        return insertedFileUri;
+                    } else {
+                        throw new SQLException("ERROR " + uri);
+                    }
+                } else {
+                    // file is already inserted; race condition, let's avoid a duplicated entry
+                    Uri insertedFileUri = ContentUris.withAppendedId(
+                            ProviderTableMeta.CONTENT_URI_FILE,
+                            doubleCheck.getLong(doubleCheck.getColumnIndex(ProviderTableMeta._ID))
+                    );
+                    doubleCheck.close();
+
                     return insertedFileUri;
-                } else {
-                    throw new SQLException("ERROR " + uri);
                 }
-            } else {
-                // file is already inserted; race condition, let's avoid a duplicated entry
-                Uri insertedFileUri = ContentUris.withAppendedId(
-                        ProviderTableMeta.CONTENT_URI_FILE, 
-                        doubleCheck.getLong(doubleCheck.getColumnIndex(ProviderTableMeta._ID))
-                );
-                doubleCheck.close();
 
-                return insertedFileUri;
-            }
-            
-        case SHARES:
-            String path = values.getAsString(ProviderTableMeta.OCSHARES_PATH);
-            String accountNameShare= values.getAsString(ProviderTableMeta.OCSHARES_ACCOUNT_OWNER);
-            String[] projectionShare = new String[] {
-                    ProviderTableMeta._ID, ProviderTableMeta.OCSHARES_PATH, 
-                    ProviderTableMeta.OCSHARES_ACCOUNT_OWNER 
-            };
-            String whereShare = ProviderTableMeta.OCSHARES_PATH + "=? AND " + 
-                    ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + "=?";
-            String[] whereArgsShare = new String[] {path, accountNameShare};
-            Uri insertedShareUri = null;
-            Cursor doubleCheckShare = 
-                    query(db, uri, projectionShare, whereShare, whereArgsShare, null);
-            // ugly patch; serious refactorization is needed to reduce work in 
-            // FileDataStorageManager and bring it to FileContentProvider
-            if (doubleCheckShare == null || !doubleCheckShare.moveToFirst()) {     
-                long rowId = db.insert(ProviderTableMeta.OCSHARES_TABLE_NAME, null, values);
-                if (rowId >0) {
-                    insertedShareUri = 
-                            ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_SHARE, rowId);
+            case SHARES:
+                String path = values.getAsString(ProviderTableMeta.OCSHARES_PATH);
+                String accountNameShare = values.getAsString(ProviderTableMeta.OCSHARES_ACCOUNT_OWNER);
+                String[] projectionShare = new String[]{
+                        ProviderTableMeta._ID, ProviderTableMeta.OCSHARES_PATH,
+                        ProviderTableMeta.OCSHARES_ACCOUNT_OWNER
+                };
+                String whereShare = ProviderTableMeta.OCSHARES_PATH + "=? AND " +
+                        ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + "=?";
+                String[] whereArgsShare = new String[]{path, accountNameShare};
+                Uri insertedShareUri = null;
+                Cursor doubleCheckShare =
+                        query(db, uri, projectionShare, whereShare, whereArgsShare, null);
+                // ugly patch; serious refactorization is needed to reduce work in
+                // FileDataStorageManager and bring it to FileContentProvider
+                if (doubleCheckShare == null || !doubleCheckShare.moveToFirst()) {
+                    long rowId = db.insert(ProviderTableMeta.OCSHARES_TABLE_NAME, null, values);
+                    if (rowId > 0) {
+                        insertedShareUri =
+                                ContentUris.withAppendedId(ProviderTableMeta.CONTENT_URI_SHARE, rowId);
+                    } else {
+                        throw new SQLException("ERROR " + uri);
+
+                    }
                 } else {
-                    throw new SQLException("ERROR " + uri);
-
+                    // file is already inserted; race condition, let's avoid a duplicated entry
+                    insertedShareUri = ContentUris.withAppendedId(
+                            ProviderTableMeta.CONTENT_URI_SHARE,
+                            doubleCheckShare.getLong(
+                                    doubleCheckShare.getColumnIndex(ProviderTableMeta._ID)
+                            )
+                    );
+                    doubleCheckShare.close();
                 }
-            } else {
-                // file is already inserted; race condition, let's avoid a duplicated entry
-                insertedShareUri = ContentUris.withAppendedId(
-                        ProviderTableMeta.CONTENT_URI_SHARE, 
-                        doubleCheckShare.getLong(
-                                doubleCheckShare.getColumnIndex(ProviderTableMeta._ID)
-                        )
-                );
-                doubleCheckShare.close();
-            }
-            updateFilesTableAccordingToShareInsertion(db, uri, values);
-            return insertedShareUri;
-            
+                updateFilesTableAccordingToShareInsertion(db, uri, values);
+                return insertedShareUri;
 
-        default:
-            throw new IllegalArgumentException("Unknown uri id: " + uri);
+
+            default:
+                throw new IllegalArgumentException("Unknown uri id: " + uri);
         }
-        
+
     }
-    
+
     private void updateFilesTableAccordingToShareInsertion(
             SQLiteDatabase db, Uri uri, ContentValues shareValues
-            ) {
+    ) {
         ContentValues fileValues = new ContentValues();
         fileValues.put(
-                ProviderTableMeta.FILE_SHARE_BY_LINK, 
-                ShareType.PUBLIC_LINK.getValue() == 
-                    shareValues.getAsInteger(ProviderTableMeta.OCSHARES_SHARE_TYPE)? 1 : 0
+                ProviderTableMeta.FILE_SHARE_BY_LINK,
+                ShareType.PUBLIC_LINK.getValue() ==
+                        shareValues.getAsInteger(ProviderTableMeta.OCSHARES_SHARE_TYPE) ? 1 : 0
         );
-        String whereShare = ProviderTableMeta.FILE_PATH + "=? AND " + 
+        String whereShare = ProviderTableMeta.FILE_PATH + "=? AND " +
                 ProviderTableMeta.FILE_ACCOUNT_OWNER + "=?";
-        String[] whereArgsShare = new String[] {
-                shareValues.getAsString(ProviderTableMeta.OCSHARES_PATH), 
+        String[] whereArgsShare = new String[]{
+                shareValues.getAsString(ProviderTableMeta.OCSHARES_PATH),
                 shareValues.getAsString(ProviderTableMeta.OCSHARES_ACCOUNT_OWNER)
         };
         db.update(ProviderTableMeta.FILE_TABLE_NAME, fileValues, whereShare, whereArgsShare);
     }
-    
+
 
     @Override
     public boolean onCreate() {
         mDbHelper = new DataBaseHelper(getContext());
-        
+
         String authority = getContext().getResources().getString(R.string.authority);
         mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         mUriMatcher.addURI(authority, null, ROOT_DIRECTORY);
@@ -393,20 +393,20 @@ public class FileContentProvider extends ContentProvider {
         mUriMatcher.addURI(authority, "dir/#", DIRECTORY);
         mUriMatcher.addURI(authority, "shares/", SHARES);
         mUriMatcher.addURI(authority, "shares/#", SHARES);
-        
+
         return true;
     }
 
-    
+
     @Override
     public Cursor query(
-            Uri uri, 
-            String[] projection, 
-            String selection, 
-            String[] selectionArgs, 
+            Uri uri,
+            String[] projection,
+            String selection,
+            String[] selectionArgs,
             String sortOrder
-        ) {
-        
+    ) {
+
         Cursor result = null;
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         db.beginTransaction();
@@ -418,45 +418,45 @@ public class FileContentProvider extends ContentProvider {
         }
         return result;
     }
-    
+
     private Cursor query(
-            SQLiteDatabase db, 
-            Uri uri, 
-            String[] projection, 
-            String selection, 
-            String[] selectionArgs, 
+            SQLiteDatabase db,
+            Uri uri,
+            String[] projection,
+            String selection,
+            String[] selectionArgs,
             String sortOrder
-        ) {
-        
+    ) {
+
         SQLiteQueryBuilder sqlQuery = new SQLiteQueryBuilder();
 
         sqlQuery.setTables(ProviderTableMeta.FILE_TABLE_NAME);
         sqlQuery.setProjectionMap(mFileProjectionMap);
 
         switch (mUriMatcher.match(uri)) {
-        case ROOT_DIRECTORY:
-            break;
-        case DIRECTORY:
-            String folderId = uri.getPathSegments().get(1);
-            sqlQuery.appendWhere(ProviderTableMeta.FILE_PARENT + "="
-                    + folderId);
-            break;
-        case SINGLE_FILE:
-            if (uri.getPathSegments().size() > 1) {
-                sqlQuery.appendWhere(ProviderTableMeta._ID + "="
-                        + uri.getPathSegments().get(1));
-            }
-            break;
-        case SHARES: 
-            sqlQuery.setTables(ProviderTableMeta.OCSHARES_TABLE_NAME);
-            sqlQuery.setProjectionMap(mOCSharesProjectionMap);
-            if (uri.getPathSegments().size() > 1) {
-                sqlQuery.appendWhere(ProviderTableMeta._ID + "="
-                        + uri.getPathSegments().get(1));
-            }
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown uri id: " + uri);
+            case ROOT_DIRECTORY:
+                break;
+            case DIRECTORY:
+                String folderId = uri.getPathSegments().get(1);
+                sqlQuery.appendWhere(ProviderTableMeta.FILE_PARENT + "="
+                        + folderId);
+                break;
+            case SINGLE_FILE:
+                if (uri.getPathSegments().size() > 1) {
+                    sqlQuery.appendWhere(ProviderTableMeta._ID + "="
+                            + uri.getPathSegments().get(1));
+                }
+                break;
+            case SHARES:
+                sqlQuery.setTables(ProviderTableMeta.OCSHARES_TABLE_NAME);
+                sqlQuery.setProjectionMap(mOCSharesProjectionMap);
+                if (uri.getPathSegments().size() > 1) {
+                    sqlQuery.appendWhere(ProviderTableMeta._ID + "="
+                            + uri.getPathSegments().get(1));
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown uri id: " + uri);
         }
 
         String order;
@@ -480,7 +480,7 @@ public class FileContentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        
+
         int count = 0;
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         db.beginTransaction();
@@ -493,19 +493,18 @@ public class FileContentProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
-    
-    
+
 
     private int update(
-            SQLiteDatabase db, 
-            Uri uri, 
-            ContentValues values, 
-            String selection, 
+            SQLiteDatabase db,
+            Uri uri,
+            ContentValues values,
+            String selection,
             String[] selectionArgs
-        ) {
+    ) {
         switch (mUriMatcher.match(uri)) {
             case DIRECTORY:
-                return  0; //updateFolderSize(db, selectionArgs[0]);
+                return 0; //updateFolderSize(db, selectionArgs[0]);
             case SHARES:
                 return db.update(
                         ProviderTableMeta.OCSHARES_TABLE_NAME, values, selection, selectionArgs
@@ -569,15 +568,15 @@ public class FileContentProvider extends ContentProvider {
         return count;
     }
 */
-    
+
     @Override
-    public ContentProviderResult[] applyBatch (ArrayList<ContentProviderOperation> operations) 
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws OperationApplicationException {
-        Log_OC.d("FileContentProvider", "applying batch in provider " + this + 
-                " (temporary: " + isTemporary() + ")" );
+        Log_OC.d("FileContentProvider", "applying batch in provider " + this +
+                " (temporary: " + isTemporary() + ")");
         ContentProviderResult[] results = new ContentProviderResult[operations.size()];
-        int i=0;
-        
+        int i = 0;
+
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         db.beginTransaction();  // it's supposed that transactions can be nested
         try {
@@ -620,14 +619,14 @@ public class FileContentProvider extends ContentProvider {
                     + ProviderTableMeta.FILE_KEEP_IN_SYNC + " INTEGER, "
                     + ProviderTableMeta.FILE_LAST_SYNC_DATE_FOR_DATA + " INTEGER, "
                     + ProviderTableMeta.FILE_MODIFIED_AT_LAST_SYNC_FOR_DATA + " INTEGER, "
-                    + ProviderTableMeta.FILE_ETAG + " TEXT, " 
+                    + ProviderTableMeta.FILE_ETAG + " TEXT, "
                     + ProviderTableMeta.FILE_SHARE_BY_LINK + " INTEGER, "
-                    + ProviderTableMeta.FILE_PUBLIC_LINK  + " TEXT, "
-                    + ProviderTableMeta.FILE_PERMISSIONS  + " TEXT null,"
-                    + ProviderTableMeta.FILE_REMOTE_ID  + " TEXT null,"
-                    + ProviderTableMeta.FILE_UPDATE_THUMBNAIL  + " INTEGER);" //boolean
-                    );
-            
+                    + ProviderTableMeta.FILE_PUBLIC_LINK + " TEXT, "
+                    + ProviderTableMeta.FILE_PERMISSIONS + " TEXT null,"
+                    + ProviderTableMeta.FILE_REMOTE_ID + " TEXT null,"
+                    + ProviderTableMeta.FILE_UPDATE_THUMBNAIL + " INTEGER);" //boolean
+            );
+
             // Create table ocshares
             db.execSQL("CREATE TABLE " + ProviderTableMeta.OCSHARES_TABLE_NAME + "("
                     + ProviderTableMeta._ID + " INTEGER PRIMARY KEY, "
@@ -636,26 +635,26 @@ public class FileContentProvider extends ContentProvider {
                     + ProviderTableMeta.OCSHARES_SHARE_TYPE + " INTEGER, "
                     + ProviderTableMeta.OCSHARES_SHARE_WITH + " TEXT, "
                     + ProviderTableMeta.OCSHARES_PATH + " TEXT, "
-                    + ProviderTableMeta.OCSHARES_PERMISSIONS+ " INTEGER, "
+                    + ProviderTableMeta.OCSHARES_PERMISSIONS + " INTEGER, "
                     + ProviderTableMeta.OCSHARES_SHARED_DATE + " INTEGER, "
                     + ProviderTableMeta.OCSHARES_EXPIRATION_DATE + " INTEGER, "
                     + ProviderTableMeta.OCSHARES_TOKEN + " TEXT, "
                     + ProviderTableMeta.OCSHARES_SHARE_WITH_DISPLAY_NAME + " TEXT, "
                     + ProviderTableMeta.OCSHARES_IS_DIRECTORY + " INTEGER, "  // boolean
                     + ProviderTableMeta.OCSHARES_USER_ID + " INTEGER, "
-                    + ProviderTableMeta.OCSHARES_ID_REMOTE_SHARED + " INTEGER," 
-                    + ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + " TEXT );" );
+                    + ProviderTableMeta.OCSHARES_ID_REMOTE_SHARED + " INTEGER,"
+                    + ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + " TEXT );");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log_OC.i("SQL", "Entering in onUpgrade");
-            boolean upgraded = false; 
+            boolean upgraded = false;
             if (oldVersion == 1 && newVersion >= 2) {
                 Log_OC.i("SQL", "Entering in the #1 ADD in onUpgrade");
                 db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
-                           " ADD COLUMN " + ProviderTableMeta.FILE_KEEP_IN_SYNC  + " INTEGER " +
-                           " DEFAULT 0");
+                        " ADD COLUMN " + ProviderTableMeta.FILE_KEEP_IN_SYNC + " INTEGER " +
+                        " DEFAULT 0");
                 upgraded = true;
             }
             if (oldVersion < 3 && newVersion >= 3) {
@@ -663,15 +662,15 @@ public class FileContentProvider extends ContentProvider {
                 db.beginTransaction();
                 try {
                     db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
-                               " ADD COLUMN " + ProviderTableMeta.FILE_LAST_SYNC_DATE_FOR_DATA  + 
-                               " INTEGER " + " DEFAULT 0");
-                    
+                            " ADD COLUMN " + ProviderTableMeta.FILE_LAST_SYNC_DATE_FOR_DATA +
+                            " INTEGER " + " DEFAULT 0");
+
                     // assume there are not local changes pending to upload
-                    db.execSQL("UPDATE " + ProviderTableMeta.FILE_TABLE_NAME + 
-                            " SET " + ProviderTableMeta.FILE_LAST_SYNC_DATE_FOR_DATA + " = " 
-                            + System.currentTimeMillis() + 
+                    db.execSQL("UPDATE " + ProviderTableMeta.FILE_TABLE_NAME +
+                            " SET " + ProviderTableMeta.FILE_LAST_SYNC_DATE_FOR_DATA + " = "
+                            + System.currentTimeMillis() +
                             " WHERE " + ProviderTableMeta.FILE_STORAGE_PATH + " IS NOT NULL");
-                 
+
                     upgraded = true;
                     db.setTransactionSuccessful();
                 } finally {
@@ -682,15 +681,15 @@ public class FileContentProvider extends ContentProvider {
                 Log_OC.i("SQL", "Entering in the #3 ADD in onUpgrade");
                 db.beginTransaction();
                 try {
-                    db .execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
-                           " ADD COLUMN " + ProviderTableMeta.FILE_MODIFIED_AT_LAST_SYNC_FOR_DATA +
-                           " INTEGER " + " DEFAULT 0");
-                
-                    db.execSQL("UPDATE " + ProviderTableMeta.FILE_TABLE_NAME + 
-                           " SET " + ProviderTableMeta.FILE_MODIFIED_AT_LAST_SYNC_FOR_DATA + " = " +
+                    db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
+                            " ADD COLUMN " + ProviderTableMeta.FILE_MODIFIED_AT_LAST_SYNC_FOR_DATA +
+                            " INTEGER " + " DEFAULT 0");
+
+                    db.execSQL("UPDATE " + ProviderTableMeta.FILE_TABLE_NAME +
+                            " SET " + ProviderTableMeta.FILE_MODIFIED_AT_LAST_SYNC_FOR_DATA + " = " +
                             ProviderTableMeta.FILE_MODIFIED +
-                           " WHERE " + ProviderTableMeta.FILE_STORAGE_PATH + " IS NOT NULL");
-                
+                            " WHERE " + ProviderTableMeta.FILE_STORAGE_PATH + " IS NOT NULL");
+
                     upgraded = true;
                     db.setTransactionSuccessful();
                 } finally {
@@ -698,17 +697,17 @@ public class FileContentProvider extends ContentProvider {
                 }
             }
             if (!upgraded)
-                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion + 
+                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion +
                         ", newVersion == " + newVersion);
-        
+
             if (oldVersion < 5 && newVersion >= 5) {
                 Log_OC.i("SQL", "Entering in the #4 ADD in onUpgrade");
                 db.beginTransaction();
                 try {
-                    db .execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
+                    db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
                             " ADD COLUMN " + ProviderTableMeta.FILE_ETAG + " TEXT " +
                             " DEFAULT NULL");
-                    
+
                     upgraded = true;
                     db.setTransactionSuccessful();
                 } finally {
@@ -716,18 +715,18 @@ public class FileContentProvider extends ContentProvider {
                 }
             }
             if (!upgraded)
-                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion + 
+                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion +
                         ", newVersion == " + newVersion);
 
             if (oldVersion < 6 && newVersion >= 6) {
                 Log_OC.i("SQL", "Entering in the #5 ADD in onUpgrade");
                 db.beginTransaction();
                 try {
-                    db .execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
+                    db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
                             " ADD COLUMN " + ProviderTableMeta.FILE_SHARE_BY_LINK + " INTEGER " +
                             " DEFAULT 0");
-                    
-                    db .execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
+
+                    db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
                             " ADD COLUMN " + ProviderTableMeta.FILE_PUBLIC_LINK + " TEXT " +
                             " DEFAULT NULL");
 
@@ -739,15 +738,15 @@ public class FileContentProvider extends ContentProvider {
                             + ProviderTableMeta.OCSHARES_SHARE_TYPE + " INTEGER, "
                             + ProviderTableMeta.OCSHARES_SHARE_WITH + " TEXT, "
                             + ProviderTableMeta.OCSHARES_PATH + " TEXT, "
-                            + ProviderTableMeta.OCSHARES_PERMISSIONS+ " INTEGER, "
+                            + ProviderTableMeta.OCSHARES_PERMISSIONS + " INTEGER, "
                             + ProviderTableMeta.OCSHARES_SHARED_DATE + " INTEGER, "
                             + ProviderTableMeta.OCSHARES_EXPIRATION_DATE + " INTEGER, "
                             + ProviderTableMeta.OCSHARES_TOKEN + " TEXT, "
                             + ProviderTableMeta.OCSHARES_SHARE_WITH_DISPLAY_NAME + " TEXT, "
                             + ProviderTableMeta.OCSHARES_IS_DIRECTORY + " INTEGER, "  // boolean
                             + ProviderTableMeta.OCSHARES_USER_ID + " INTEGER, "
-                            + ProviderTableMeta.OCSHARES_ID_REMOTE_SHARED + " INTEGER," 
-                            + ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + " TEXT );" );
+                            + ProviderTableMeta.OCSHARES_ID_REMOTE_SHARED + " INTEGER,"
+                            + ProviderTableMeta.OCSHARES_ACCOUNT_OWNER + " TEXT );");
 
                     upgraded = true;
                     db.setTransactionSuccessful();
@@ -756,21 +755,21 @@ public class FileContentProvider extends ContentProvider {
                 }
             }
             if (!upgraded)
-                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion + 
+                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion +
                         ", newVersion == " + newVersion);
 
             if (oldVersion < 7 && newVersion >= 7) {
                 Log_OC.i("SQL", "Entering in the #7 ADD in onUpgrade");
                 db.beginTransaction();
                 try {
-                    db .execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
+                    db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
                             " ADD COLUMN " + ProviderTableMeta.FILE_PERMISSIONS + " TEXT " +
                             " DEFAULT NULL");
 
-                    db .execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
+                    db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
                             " ADD COLUMN " + ProviderTableMeta.FILE_REMOTE_ID + " TEXT " +
                             " DEFAULT NULL");
-                    
+
                     upgraded = true;
                     db.setTransactionSuccessful();
                 } finally {
@@ -778,14 +777,14 @@ public class FileContentProvider extends ContentProvider {
                 }
             }
             if (!upgraded)
-                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion + 
+                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion +
                         ", newVersion == " + newVersion);
 
             if (oldVersion < 8 && newVersion >= 8) {
                 Log_OC.i("SQL", "Entering in the #8 ADD in onUpgrade");
                 db.beginTransaction();
                 try {
-                    db .execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
+                    db.execSQL("ALTER TABLE " + ProviderTableMeta.FILE_TABLE_NAME +
                             " ADD COLUMN " + ProviderTableMeta.FILE_UPDATE_THUMBNAIL + " INTEGER " +
                             " DEFAULT 0");
 
@@ -796,7 +795,7 @@ public class FileContentProvider extends ContentProvider {
                 }
             }
             if (!upgraded)
-                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion + 
+                Log_OC.i("SQL", "OUT of the ADD in onUpgrade; oldVersion == " + oldVersion +
                         ", newVersion == " + newVersion);
         }
     }

@@ -17,11 +17,6 @@
 
 package com.owncloud.android.ui.dialog;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;
@@ -46,6 +41,11 @@ import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.ui.activity.ComponentsGetter;
 import com.owncloud.android.ui.activity.CopyToClipboardActivity;
 import com.owncloud.android.ui.activity.FileActivity;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Dialog showing a list activities able to resolve a given Intent, 

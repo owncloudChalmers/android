@@ -18,25 +18,22 @@
 package com.owncloud.android.ui;
 
 import android.content.Context;
-
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup;
-
-import java.util.ArrayList;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.owncloud.android.R;
+
+import java.util.ArrayList;
 
 
 /**

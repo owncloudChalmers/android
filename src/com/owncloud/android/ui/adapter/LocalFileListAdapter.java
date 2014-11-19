@@ -17,10 +17,6 @@
  */
 package com.owncloud.android.ui.adapter;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +29,10 @@ import android.widget.TextView;
 
 import com.owncloud.android.R;
 import com.owncloud.android.utils.DisplayUtils;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * This Adapter populates a ListView with all files and directories contained

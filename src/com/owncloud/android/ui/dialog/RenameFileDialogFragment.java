@@ -22,11 +22,6 @@ package com.owncloud.android.ui.dialog;
  * 
  *  Triggers the rename operation. 
  */
-import com.actionbarsherlock.app.SherlockDialogFragment;
-import com.owncloud.android.R;
-import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.lib.resources.files.FileUtils;
-import com.owncloud.android.ui.activity.ComponentsGetter;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -38,6 +33,12 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockDialogFragment;
+import com.owncloud.android.R;
+import com.owncloud.android.datamodel.OCFile;
+import com.owncloud.android.lib.resources.files.FileUtils;
+import com.owncloud.android.ui.activity.ComponentsGetter;
 
 
 /**

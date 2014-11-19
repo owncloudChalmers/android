@@ -19,7 +19,7 @@ package com.owncloud.android.operations;
 
 /**
  * Creates a new share from a given file
- * 
+ *
  * @author masensio
  *
  */
@@ -29,20 +29,20 @@ import android.content.Intent;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.common.OwnCloudClient;
-import com.owncloud.android.lib.resources.shares.OCShare;
 import com.owncloud.android.lib.common.operations.RemoteOperation;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.lib.common.utils.Log_OC;
-import com.owncloud.android.lib.resources.shares.GetRemoteSharesForFileOperation;
-import com.owncloud.android.lib.resources.shares.ShareType;
-import com.owncloud.android.lib.resources.shares.CreateRemoteShareOperation;
 import com.owncloud.android.lib.resources.files.FileUtils;
+import com.owncloud.android.lib.resources.shares.CreateRemoteShareOperation;
+import com.owncloud.android.lib.resources.shares.GetRemoteSharesForFileOperation;
+import com.owncloud.android.lib.resources.shares.OCShare;
+import com.owncloud.android.lib.resources.shares.ShareType;
 import com.owncloud.android.operations.common.SyncOperation;
 
 public class CreateShareOperation extends SyncOperation {
 
     private static final String TAG = CreateShareOperation.class.getSimpleName();
-    
+
 
     protected FileDataStorageManager mStorageManager;
 
@@ -56,24 +56,41 @@ public class CreateShareOperation extends SyncOperation {
 
     /**
      * Constructor
-     * @param path          Full path of the file/folder being shared. Mandatory argument
-     * @param shareType     0 = user, 1 = group, 3 = Public link. Mandatory argument
-     * @param shareWith     User/group ID with who the file should be shared.  This is mandatory for shareType of 0 or 1
-     * @param publicUpload  If false (default) public cannot upload to a public shared folder. 
-     *                      If true public can upload to a shared folder. Only available for public link shares
-     * @param password      Password to protect a public link share. Only available for public link shares
-     * @param permissions   1 - Read only - Default for public shares
-     *                      2 - Update
-     *                      4 - Create
-     *                      8 - Delete
-     *                      16- Re-share
-     *                      31- All above - Default for private shares
-     *                      For user or group shares.
-     *                      To obtain combinations, add the desired values together.  
-     *                      For instance, for Re-Share, delete, read, update, add 16+8+2+1 = 27.
+     *
+     * @param path         Full path of the file/folder being shared. Mandatory argument
+     *                     <<<<<<< HEAD
+     * @param shareType    0 = user, 1 = group, 3 = Public link. Mandatory argument
+     * @param shareWith    User/group ID with who the file should be shared.  This is mandatory for shareType of 0 or 1
+     * @param publicUpload If false (default) public cannot upload to a public shared folder.
+     *                     If true public can upload to a shared folder. Only available for public link shares
+     * @param password     Password to protect a public link share. Only available for public link shares
+     * @param permissions  1 - Read only - Default for public shares
+     *                     =======
+     * @param shareType    �0� = user, �1� = group, �3� = Public link. Mandatory argument
+     * @param shareWith    User/group ID with who the file should be shared.  This is mandatory for shareType of 0 or 1
+     * @param publicUpload If �false� (default) public cannot upload to a public shared folder.
+     *                     If �true� public can upload to a shared folder. Only available for public link shares
+     * @param password     Password to protect a public link share. Only available for public link shares
+     * @param permissions  1 - Read only � Default for �public� shares
+     *                     >>>>>>> origin/remember_last_upload_directory
+     *                     2 - Update
+     *                     4 - Create
+     *                     8 - Delete
+     *                     16- Re-share
+     *                     <<<<<<< HEAD
+     *                     31- All above - Default for private shares
+     *                     For user or group shares.
+     *                     To obtain combinations, add the desired values together.
+     *                     For instance, for Re-Share, delete, read, update, add 16+8+2+1 = 27.
+     *                     =======
+     *                     31- All above � Default for �private� shares
+     *                     For user or group shares.
+     *                     To obtain combinations, add the desired values together.
+     *                     For instance, for �Re-Share�, �delete�, �read�, �update�, add 16+8+2+1 = 27.
+     *                     >>>>>>> origin/remember_last_upload_directory
      */
-    public CreateShareOperation(String path, ShareType shareType, String shareWith, boolean publicUpload, 
-            String password, int permissions, Intent sendIntent) {
+    public CreateShareOperation(String path, ShareType shareType, String shareWith, boolean publicUpload,
+                                String password, int permissions, Intent sendIntent) {
 
         mPath = path;
         mShareType = shareType;
@@ -87,31 +104,31 @@ public class CreateShareOperation extends SyncOperation {
     @Override
     protected RemoteOperationResult run(OwnCloudClient client) {
         RemoteOperation operation = null;
-        
+
         // Check if the share link already exists
         operation = new GetRemoteSharesForFileOperation(mPath, false, false);
-        RemoteOperationResult result = ((GetRemoteSharesForFileOperation)operation).execute(client);
+        RemoteOperationResult result = ((GetRemoteSharesForFileOperation) operation).execute(client);
 
         if (!result.isSuccess() || result.getData().size() <= 0) {
             operation = new CreateRemoteShareOperation(mPath, mShareType, mShareWith, mPublicUpload, mPassword, mPermissions);
-            result = ((CreateRemoteShareOperation)operation).execute(client);
+            result = ((CreateRemoteShareOperation) operation).execute(client);
         }
-        
+
         if (result.isSuccess()) {
             if (result.getData().size() > 0) {
                 OCShare share = (OCShare) result.getData().get(0);
                 updateData(share);
-            } 
+            }
         }
-        
+
         return result;
     }
-    
-    
+
+
     public Intent getSendIntent() {
         return mSendIntent;
     }
-    
+
     private void updateData(OCShare share) {
         // Update DB with the response
         share.setPath(mPath);
@@ -121,12 +138,12 @@ public class CreateShareOperation extends SyncOperation {
             share.setIsFolder(false);
         }
         share.setPermissions(mPermissions);
-        
+
         getStorageManager().saveShare(share);
-        
+
         // Update OCFile with data from share: ShareByLink  and publicLink
         OCFile file = getStorageManager().getFileByPath(mPath);
-        if (file!=null) {
+        if (file != null) {
             mSendIntent.putExtra(Intent.EXTRA_TEXT, share.getShareLink());
             file.setPublicLink(share.getShareLink());
             file.setShareByLink(true);
