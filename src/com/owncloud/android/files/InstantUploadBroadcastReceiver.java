@@ -54,7 +54,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
     // Officially supported action since SDK 14: http://developer.android.com/reference/android/hardware/Camera.html#ACTION_NEW_VIDEO
     private static String NEW_VIDEO_ACTION = "android.hardware.action.NEW_VIDEO";
 
-
+    
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -64,23 +64,19 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
             handleConnectivityAction(context, intent);
         } else if (action.equals(NEW_PHOTO_ACTION_UNOFFICIAL)) {
             Log_OC.d(TAG, "UNOFFICIAL processed: com.android.camera.NEW_PICTURE");
-            handleNewInstantUpload(context, intent);
+            handleInstantUploadAction(context, intent);
         } else if(action.equals(NEW_PHOTO_ACTION)) {
             Log_OC.d(TAG, "OFFICIAL processed: android.hardware.action.NEW_PICTURE");
-            handleNewInstantUpload(context, intent);
+            handleInstantUploadAction(context, intent);
         } else if(action.equals(NEW_VIDEO_ACTION)) {
             Log_OC.d(TAG, "OFFICIAL processed: android.hardware.action.NEW_VIDEO");
-            handleNewInstantUpload(context, intent);
+            handleInstantUploadAction(context, intent);
         } else {
             Log_OC.e(TAG, "Incorrect intent sent: " + intent.getAction());
         }
     }
 
-    private void handleVideoAction() {
-
-    }
-
-    private void handleNewInstantUpload(Context context, Intent intent) {
+    private void handleInstantUploadAction(Context context, Intent intent) {
         // Get the account to associate with the upload
         // Abort if no account is available
         Account account = AccountUtils.getCurrentOwnCloudAccount(context);
@@ -89,142 +85,146 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        Cursor c = null;
-        String file_path = null;
-        String file_name = null;
-        String mime_type = null;
+        // File information
+        String[] CONTENT_PROJECTION;
+        String data;
 
         // Check if Photo or Video
         if (isVideoAction(intent.getAction())) {
             Log_OC.w(TAG, "New video received");
 
+            // Abort if instant video upload is disabled
             if (!instantVideoUploadEnabled(context)) {
                 Log_OC.d(TAG, "Instant video upload disabled, ignoring new video");
                 return;
             }
 
-            String[] CONTENT_PROJECTION = { Video.Media.DATA, Video.Media.DISPLAY_NAME, Video.Media.MIME_TYPE, Video.Media.SIZE };
-            c = context.getContentResolver().query(intent.getData(), CONTENT_PROJECTION, null, null, null);
-            if (!c.moveToFirst()) {
-                Log_OC.e(TAG, "Couldn't resolve given uri: " + intent.getDataString());
-                return;
-            }
-
-            file_path = c.getString(c.getColumnIndex(Video.Media.DATA));
-            file_name = c.getString(c.getColumnIndex(Video.Media.DISPLAY_NAME));
-            mime_type = c.getString(c.getColumnIndex(Video.Media.MIME_TYPE));
-            c.close();
-        } else { // Not video => photo
+            CONTENT_PROJECTION = new String[]{ Video.Media.DATA, Video.Media.DISPLAY_NAME, Video.Media.MIME_TYPE, Video.Media.SIZE };
+            data = Video.Media.DATA;
+        } else {
             Log_OC.w(TAG, "New photo received");
 
+            // Abort if instant photo upload is disabled
             if (!instantPictureUploadEnabled(context)) {
                 Log_OC.d(TAG, "Instant picture upload disabled, ignoring new picture");
                 return;
             }
 
-            String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE };
-            c = context.getContentResolver().query(intent.getData(), CONTENT_PROJECTION, null, null, null);
-            if (!c.moveToFirst()) {
-                Log_OC.e(TAG, "Couldn't resolve given uri: " + intent.getDataString());
-                return;
-            }
-
-            file_path = c.getString(c.getColumnIndex(Images.Media.DATA));
-            file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME));
-            mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE));
-            c.close();
+            CONTENT_PROJECTION = new String[]{ Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE };
+            data = Images.Media.DATA;
         }
 
-        Log_OC.d(TAG, "File path: " + file_path);
+        // Create cursor and move to first row. If unable to move to the first row, abort.
+        Cursor c = context.getContentResolver().query(intent.getData(), CONTENT_PROJECTION, null, null, null);
+        if (!c.moveToFirst()) {
+            Log_OC.e(TAG, "Couldn't resolve given uri: " + intent.getDataString());
+            return;
+        }
+
+        // Get the file path for the instant upload
+        String filePath = c.getString(c.getColumnIndex(data));
+        c.close();
+        Log_OC.d(TAG, "File path: " + filePath);
 
         // save always temporally the picture to upload
         DbHandler db = new DbHandler(context);
-        db.putFileForLater(file_path, account.name, null);
+        db.putFileForLater(filePath, account.name, null);
         db.close();
 
-        Intent i = new Intent(context, FileUploader.class);
-        if (isVideoAction(intent.getAction())) {
-            if (!isOnline(context) || (instantVideoUploadViaWiFiOnly(context) && !isConnectedViaWiFi(context))) {
-                return;
-            }
+        // Initiate upload attempt
+        createUploadIntent(context, intent);
+    }
 
-            i.putExtra(FileUploader.KEY_FILE_TYPE, FileUploader.FILE_TYPE_VIDEO);
-        } else {
-            if (!isOnline(context) || (instantPictureUploadViaWiFiOnly(context) && !isConnectedViaWiFi(context))) {
-                Log_OC.e(TAG, "Couldn't resolve given uri: " + intent.getDataString());
-                return;
-            }
-
-            i.putExtra(FileUploader.KEY_FILE_TYPE, FileUploader.FILE_TYPE_IMAGE);
+    /**
+     * Creates and starts an intent for uploading files.
+     * This method aborts if there is no valid upload connection.
+     *
+     * @param context
+     * @param intent
+     */
+    private void createUploadIntent(Context context, Intent intent) {
+        // If there is no valid connection, abort.
+        if (intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY) || !isOnline(context)) {
+            Log_OC.d(TAG, "No connectivity, abort upload.");
+            return;
         }
 
-        i.putExtra(FileUploader.KEY_ACCOUNT, account);
-        i.putExtra(FileUploader.KEY_LOCAL_FILE, file_path);
-        i.putExtra(FileUploader.KEY_REMOTE_FILE, FileStorageUtils.getInstantUploadFilePath(context, file_name));
-        i.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_SINGLE_FILE);
-        i.putExtra(FileUploader.KEY_MIME_TYPE, mime_type);
-        i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
+        // TODO: Handle Wifi-limitations, tricky given that we get not just instant upload files here.
+        // (!instantPictureUploadViaWiFiOnly(context) || (instantPictureUploadViaWiFiOnly(context) == isConnectedViaWiFi(context) == true)))
 
-        // Intent information indicating that no local files should be stored
-        SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(context);
-        if(pm.getBoolean("instant_upload_no_local", false)){
-            i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, true);
-            i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
+        DbHandler db = new DbHandler(context);
+        Cursor c = db.getAwaitingFiles();
+        if (c.moveToFirst()) {
+            do {
+                String account_name = c.getString(c.getColumnIndex("account"));
+                String file_path = c.getString(c.getColumnIndex("path"));
+                File f = new File(file_path);
+                if (f.exists()) {
+                    Account account = new Account(account_name, MainApp.getAccountType());
+
+                    String mimeType = null;
+                    try {
+                        mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                                f.getName().substring(f.getName().lastIndexOf('.') + 1));
+
+                    } catch (Throwable e) {
+                        Log_OC.e(TAG, "Trying to find out MIME type of a file without extension: " + f.getName());
+                    }
+                    if (mimeType == null)
+                        mimeType = "application/octet-stream";
+
+                    Intent i = new Intent(context, FileUploader.class);
+                    i.putExtra(FileUploader.KEY_ACCOUNT, account);
+                    i.putExtra(FileUploader.KEY_LOCAL_FILE, file_path);
+                    i.putExtra(FileUploader.KEY_REMOTE_FILE, FileStorageUtils.getInstantUploadFilePath(context, f.getName()));
+                    i.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_SINGLE_FILE);
+                    i.putExtra(FileUploader.KEY_MIME_TYPE, mimeType);
+                    i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
+
+                    // Intent information indicating that no local files should be stored
+                    SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(context);
+                    if(pm.getBoolean("instant_upload_no_local", false)){
+                        i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, true);
+                        i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
+
+                        // Add FileUploader.KEY_FILE_TYPE to the intent.
+                        // This is needed in order to properly delete thumbnails when local files are to be deleted.
+                        if (isMimeTypeImage(mimeType)) {
+                            i.putExtra(FileUploader.KEY_FILE_TYPE, FileUploader.FILE_TYPE_IMAGE);
+                        } else if(isMimeTypeVideo(mimeType)) {
+                            i.putExtra(FileUploader.KEY_FILE_TYPE, FileUploader.FILE_TYPE_VIDEO);
+                        }
+                    }
+
+                    context.startService(i);
+                } else {
+                    Log_OC.w(TAG, "Instant upload file " + f.getAbsolutePath() + " don't exist anymore");
+                }
+            } while (c.moveToNext());
         }
-
-        context.startService(i);
+        c.close();
+        db.close();
     }
 
     private void handleConnectivityAction(Context context, Intent intent) {
-        if (!instantPictureUploadEnabled(context)) {
+        if (!instantPictureUploadEnabled(context) && !instantVideoUploadEnabled(context)) {
             Log_OC.d(TAG, "Instant upload disabled, don't upload anything");
             return;
         }
 
-        if (!intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY)
-                && isOnline(context)
-                && (!instantPictureUploadViaWiFiOnly(context) || (instantPictureUploadViaWiFiOnly(context) == isConnectedViaWiFi(context) == true))) {
-            DbHandler db = new DbHandler(context);
-            Cursor c = db.getAwaitingFiles();
-            if (c.moveToFirst()) {
-                do {
-                    String account_name = c.getString(c.getColumnIndex("account"));
-                    String file_path = c.getString(c.getColumnIndex("path"));
-                    File f = new File(file_path);
-                    if (f.exists()) {
-                        Account account = new Account(account_name, MainApp.getAccountType());
-
-                        String mimeType = null;
-                        try {
-                            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                                    f.getName().substring(f.getName().lastIndexOf('.') + 1));
-
-                        } catch (Throwable e) {
-                            Log_OC.e(TAG, "Trying to find out MIME type of a file without extension: " + f.getName());
-                        }
-                        if (mimeType == null)
-                            mimeType = "application/octet-stream";
-
-                        Intent i = new Intent(context, FileUploader.class);
-                        i.putExtra(FileUploader.KEY_ACCOUNT, account);
-                        i.putExtra(FileUploader.KEY_LOCAL_FILE, file_path);
-                        i.putExtra(FileUploader.KEY_REMOTE_FILE, FileStorageUtils.getInstantUploadFilePath(context, f.getName()));
-                        i.putExtra(FileUploader.KEY_UPLOAD_TYPE, FileUploader.UPLOAD_SINGLE_FILE);
-                        i.putExtra(FileUploader.KEY_INSTANT_UPLOAD, true);
-                        context.startService(i);
-                    } else {
-                        Log_OC.w(TAG, "Instant upload file " + f.getAbsolutePath() + " dont exist anymore");
-                    }
-                } while (c.moveToNext());
-            }
-            c.close();
-            db.close();
-        }
-
+        createUploadIntent(context, intent);
     }
 
     private static boolean isVideoAction(String intentAction) {
         return NEW_VIDEO_ACTION.equals(intentAction);
+    }
+
+    private static boolean isMimeTypeImage(String mimeType) {
+        return mimeType != null && mimeType.startsWith("image/");
+    }
+
+    private static boolean isMimeTypeVideo(String mimeType) {
+        return mimeType != null && mimeType.startsWith("video/");
     }
 
     public static boolean isOnline(Context context) {
