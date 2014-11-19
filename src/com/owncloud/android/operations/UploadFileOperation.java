@@ -56,6 +56,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 
 /**
@@ -84,7 +85,6 @@ public class UploadFileOperation extends RemoteOperation {
     private Set<OnDatatransferProgressListener> mDataTransferListeners = new HashSet<OnDatatransferProgressListener>();
     private final AtomicBoolean mCancellationRequested = new AtomicBoolean(false);
     private Context mContext;
-    private int mFileType;
     
     private UploadRemoteFileOperation mUploadOperation;
 
@@ -98,8 +98,7 @@ public class UploadFileOperation extends RemoteOperation {
                                 boolean removeInstantOriginal,
                                 boolean forceOverwrite,
                                 int localBehaviour, 
-                                Context context,
-                                int fileType) {
+                                Context context) {
         if (account == null)
             throw new IllegalArgumentException("Illegal NULL account in UploadFileOperation creation");
         if (file == null)
@@ -116,7 +115,6 @@ public class UploadFileOperation extends RemoteOperation {
         mRemotePath = file.getRemotePath();
         mChunked = chunked;
         mIsInstant = isInstant;
-        mFileType = fileType;
         mRemoveInstantOriginal = removeInstantOriginal;
         mForceOverwrite = forceOverwrite;
         mLocalBehaviour = localBehaviour;
@@ -366,16 +364,16 @@ public class UploadFileOperation extends RemoteOperation {
 
         if(mIsInstant && mRemoveInstantOriginal && result.isSuccess()){
             boolean fileDeleteResult;
-            switch(mFileType){
-                case FileUploader.FILE_TYPE_IMAGE:
-                    fileDeleteResult = FileStorageUtils.deleteImageFile(mContext, originalFile);
-                    break;
-                case FileUploader.FILE_TYPE_VIDEO:
-                    fileDeleteResult = FileStorageUtils.deleteVideoFile(mContext, originalFile);
-                    break;
-                default:
-                    fileDeleteResult = originalFile.delete();
-                    break;
+
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    originalFile.getName().substring(originalFile.getName().lastIndexOf('.') + 1));
+
+            if (mimeType.startsWith("image/")) {
+                fileDeleteResult = FileStorageUtils.deleteImageFile(mContext, originalFile);
+            } else if(mimeType.startsWith("video/")) {
+                fileDeleteResult = FileStorageUtils.deleteVideoFile(mContext, originalFile);
+            } else {
+                fileDeleteResult = originalFile.delete();
             }
 
             if(fileDeleteResult) {

@@ -98,11 +98,6 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
     public static final String KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL = "INSTANT_UPLOAD_REMOVE_ORIGINAL";
     public static final String KEY_LOCAL_BEHAVIOUR = "BEHAVIOUR";
 
-    public static final String KEY_FILE_TYPE = "KEY_FILE_TYPE";
-    public static final int FILE_TYPE_FILE = 0;
-    public static final int FILE_TYPE_IMAGE = 1;
-    public static final int FILE_TYPE_VIDEO = 2;
-
     public static final int LOCAL_BEHAVIOUR_COPY = 0;
     public static final int LOCAL_BEHAVIOUR_MOVE = 1;
     public static final int LOCAL_BEHAVIOUR_FORGET = 2;
@@ -232,7 +227,6 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
         boolean isInstant = intent.getBooleanExtra(KEY_INSTANT_UPLOAD, false);
         boolean removeInstantOriginal = intent.getBooleanExtra(KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, false);
         int localAction = intent.getIntExtra(KEY_LOCAL_BEHAVIOUR, LOCAL_BEHAVIOUR_COPY);
-        int fileType = intent.getIntExtra(KEY_FILE_TYPE, FILE_TYPE_FILE);
         
         if (intent.hasExtra(KEY_FILE) && files == null) {
             Log_OC.e(TAG, "Incorrect array for OCFiles provided in upload intent");
@@ -275,7 +269,7 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
             for (int i = 0; i < files.length; i++) {
                 uploadKey = buildRemoteName(account, files[i].getRemotePath());
                 newUpload = new UploadFileOperation(account, files[i], chunked, isInstant, removeInstantOriginal,
-                        forceOverwrite, localAction, getApplicationContext(), fileType);
+                        forceOverwrite, localAction, getApplicationContext());
                 if (isInstant) {
                     newUpload.setRemoteFolderToBeCreated();
                 }

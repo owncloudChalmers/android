@@ -86,8 +86,8 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         }
 
         // File information
-        String[] CONTENT_PROJECTION;
-        String data;
+        String[] CONTENT_PROJECTION = null;
+        String data = null;
 
         // Check if Photo or Video
         if (isVideoAction(intent.getAction())) {
@@ -101,7 +101,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
 
             CONTENT_PROJECTION = new String[]{ Video.Media.DATA, Video.Media.DISPLAY_NAME, Video.Media.MIME_TYPE, Video.Media.SIZE };
             data = Video.Media.DATA;
-        } else {
+        } else if (isImageAction(intent.getAction())) {
             Log_OC.w(TAG, "New photo received");
 
             // Abort if instant photo upload is disabled
@@ -147,6 +147,9 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         if (intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY) || !isOnline(context)) {
             Log_OC.d(TAG, "No connectivity, abort upload.");
             return;
+        } else if ((instantPictureUploadViaWiFiOnly(context) && instantVideoUploadViaWiFiOnly(context)) && !isConnectedViaWiFi(context)) {
+            Log_OC.d(TAG, "No wifi-connectivity which is required, abort upload.");
+            return;
         }
 
         // TODO: Handle Wifi-limitations, tricky given that we get not just instant upload files here.
@@ -186,14 +189,6 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
                     if(pm.getBoolean("instant_upload_no_local", false)){
                         i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, true);
                         i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
-
-                        // Add FileUploader.KEY_FILE_TYPE to the intent.
-                        // This is needed in order to properly delete thumbnails when local files are to be deleted.
-                        if (isMimeTypeImage(mimeType)) {
-                            i.putExtra(FileUploader.KEY_FILE_TYPE, FileUploader.FILE_TYPE_IMAGE);
-                        } else if(isMimeTypeVideo(mimeType)) {
-                            i.putExtra(FileUploader.KEY_FILE_TYPE, FileUploader.FILE_TYPE_VIDEO);
-                        }
                     }
 
                     context.startService(i);
@@ -219,12 +214,8 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         return NEW_VIDEO_ACTION.equals(intentAction);
     }
 
-    private static boolean isMimeTypeImage(String mimeType) {
-        return mimeType != null && mimeType.startsWith("image/");
-    }
-
-    private static boolean isMimeTypeVideo(String mimeType) {
-        return mimeType != null && mimeType.startsWith("video/");
+    private static boolean isImageAction(String intentAction) {
+        return NEW_PHOTO_ACTION.equals(intentAction) || NEW_PHOTO_ACTION_UNOFFICIAL.equals(intentAction);
     }
 
     public static boolean isOnline(Context context) {
