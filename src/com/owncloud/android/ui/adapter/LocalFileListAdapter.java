@@ -22,16 +22,24 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
+import com.owncloud.android.datamodel.ThumbnailsCacheManager;
+import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.utils.BitmapUtils;
 import com.owncloud.android.utils.DisplayUtils;
 
 /**
@@ -101,7 +109,19 @@ public class LocalFileListAdapter extends BaseAdapter implements ListAdapter {
             
             ImageView fileIcon = (ImageView) view.findViewById(R.id.imageView1);
             if (!file.isDirectory()) {
-                fileIcon.setImageResource(R.drawable.file);
+                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        file.getName().substring(file.getName().lastIndexOf('.') + 1));
+                if (mimeType == null)
+                    mimeType = "unknown";
+
+                // get Thumbnail if file is image
+                if (mimeType.startsWith("image/")) {
+                    Resources r = MainApp.getAppContext().getResources();
+                    int px = (int) Math.round(r.getDimension(R.dimen.file_icon_size));
+                    fileIcon.setImageBitmap(BitmapUtils.decodeSampledBitmapFromFile(file.getAbsolutePath(), px, px));
+                } else {
+                    fileIcon.setImageResource(DisplayUtils.getResourceId(mimeType, file.getName()));
+                }
             } else {
                 fileIcon.setImageResource(R.drawable.ic_menu_archive);
             }
