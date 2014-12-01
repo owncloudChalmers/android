@@ -108,6 +108,7 @@ public class LocalFileListAdapter extends BaseAdapter implements ListAdapter {
             fileName.setText(name);
             
             ImageView fileIcon = (ImageView) view.findViewById(R.id.imageView1);
+            fileIcon.setTag(file);
             if (!file.isDirectory()) {
                 String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                         file.getName().substring(file.getName().lastIndexOf('.') + 1));
@@ -116,12 +117,34 @@ public class LocalFileListAdapter extends BaseAdapter implements ListAdapter {
 
                 // get Thumbnail if file is image
                 if (mimeType.startsWith("image/")) {
-                    Resources r = MainApp.getAppContext().getResources();
-                    int px = (int) Math.round(r.getDimension(R.dimen.file_icon_size));
-                    fileIcon.setImageBitmap(BitmapUtils.decodeSampledBitmapFromFile(file.getAbsolutePath(), px, px));
+                    // Thumbnail in Cache?
+                    Bitmap thumbnail = ThumbnailsCacheManager.getBitmapFromDiskCache(
+                            String.valueOf(file.getAbsolutePath()));
+
+                    if (thumbnail != null) {
+                        fileIcon.setImageBitmap(thumbnail);
+                    }  else {
+                        // generate new Thumbnail
+                        if (ThumbnailsCacheManager.cancelPotentialWork(file.getAbsolutePath(), fileIcon)) {
+                            final ThumbnailsCacheManager.LocalThumbnailGenerationTask task =
+                                    new ThumbnailsCacheManager.LocalThumbnailGenerationTask(fileIcon);
+                            if (thumbnail == null) {
+                                thumbnail = ThumbnailsCacheManager.mDefaultImg;
+                            }
+                            final ThumbnailsCacheManager.AsyncDrawable asyncDrawable = new ThumbnailsCacheManager.AsyncDrawable(
+                                    mContext.getResources(),
+                                    thumbnail,
+                                    task
+                            );
+                            fileIcon.setImageDrawable(asyncDrawable);
+                            task.execute(file.getAbsolutePath());
+                        }
+                    }
+
                 } else {
                     fileIcon.setImageResource(DisplayUtils.getResourceId(mimeType, file.getName()));
                 }
+
             } else {
                 fileIcon.setImageResource(R.drawable.ic_menu_archive);
             }
