@@ -554,6 +554,12 @@ public class FileDisplayActivity extends HookActivity implements
                 }
                 break;
             }
+            case R.id.action_quota_stats: {
+                Intent quotaDisplayIntent = new Intent(getApplicationContext(),QuotaDisplayActivity.class);
+                quotaDisplayIntent.putExtra(EXTRA_ACCOUNT, getAccount());
+                startActivity(quotaDisplayIntent);
+                break;
+            }
             default:
                 retval = super.onOptionsItemSelected(item);
                 int i = item.getItemId();
@@ -579,9 +585,12 @@ public class FileDisplayActivity extends HookActivity implements
                 } else {
                     retval = super.onOptionsItemSelected(item);
                 }
+                //builder.create().show();
+                break;
         }
         return retval;
     }
+
 
     private void startSynchronization() {
         Log_OC.e(TAG, "Got to start sync");
