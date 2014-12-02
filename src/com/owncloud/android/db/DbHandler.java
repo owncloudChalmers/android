@@ -17,20 +17,19 @@
  */
 package com.owncloud.android.db;
 
-import com.owncloud.android.MainApp;
-import com.owncloud.android.lib.common.utils.Log_OC;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.owncloud.android.MainApp;
+import com.owncloud.android.lib.common.utils.Log_OC;
+
 /**
  * Custom database helper for ownCloud
- * 
+ *
  * @author Bartek Przybylski
- * 
  */
 public class DbHandler {
     private SQLiteDatabase mDB;
@@ -68,7 +67,7 @@ public class DbHandler {
         ContentValues cv = new ContentValues();
         cv.put("attempt", status);
         cv.put("message", message);
-        int result = mDB.update(TABLE_INSTANT_UPLOAD, cv, "path=?", new String[] { filepath });
+        int result = mDB.update(TABLE_INSTANT_UPLOAD, cv, "path=?", new String[]{filepath});
         Log_OC.d(TABLE_INSTANT_UPLOAD, "updateFileState returns with: " + result + " for file: " + filepath);
         return result;
     }
@@ -86,12 +85,11 @@ public class DbHandler {
     }
 
     /**
-     * 
      * @param localPath
      * @return true when one or more pending files was removed
      */
     public boolean removeIUPendingFile(String localPath) {
-        long result = mDB.delete(TABLE_INSTANT_UPLOAD, "path = ?", new String[] { localPath });
+        long result = mDB.delete(TABLE_INSTANT_UPLOAD, "path = ?", new String[]{localPath});
         Log_OC.d(TABLE_INSTANT_UPLOAD, "delete returns with: " + result + " for file: " + localPath);
         return result != 0;
 

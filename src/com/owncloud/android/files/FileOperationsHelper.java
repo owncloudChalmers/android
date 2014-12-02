@@ -39,6 +39,8 @@ import com.owncloud.android.ui.dialog.ShareLinkToDialog;
 
 import org.apache.http.protocol.HTTP;
 
+import org.apache.http.protocol.HTTP;
+
 /**
  * @author masensio
  * @author David A. Velasco

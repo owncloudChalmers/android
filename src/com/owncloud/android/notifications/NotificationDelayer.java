@@ -1,11 +1,11 @@
 package com.owncloud.android.notifications;
 
-import java.util.Random;
-
 import android.app.NotificationManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+
+import java.util.Random;
 
 public class NotificationDelayer {
     

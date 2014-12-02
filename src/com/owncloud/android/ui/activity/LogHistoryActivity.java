@@ -17,14 +17,6 @@
 
 package com.owncloud.android.ui.activity;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -46,8 +38,16 @@ import com.owncloud.android.ui.dialog.LoadingDialog;
 import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.FileStorageUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 
-public class LogHistoryActivity extends SherlockFragmentActivity  {
+
+public class LogHistoryActivity extends SherlockFragmentActivity {
 
     private static final String MAIL_ATTACHMENT_TYPE = "text/plain";
 
@@ -72,7 +72,7 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
         Button sendHistoryButton = (Button) findViewById(R.id.sendLogHistoryButton);
 
         deleteHistoryButton.setOnClickListener(new OnClickListener() {
-            
+
             @Override
             public void onClick(View v) {
 
@@ -110,11 +110,11 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         super.onMenuItemSelected(featureId, item);
         switch (item.getItemId()) {
-        case android.R.id.home:
-            finish();
-            break;
-        default:
-            return false;
+            case android.R.id.home:
+                finish();
+                break;
+            default:
+                return false;
         }
         return true;
     }
@@ -129,9 +129,9 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
         try {
             Class<?> stringClass = R.string.class;
             Field mailLoggerField = stringClass.getField("mail_logger");
-            int emailAddressId = (Integer)mailLoggerField.get(null);
+            int emailAddressId = (Integer) mailLoggerField.get(null);
             emailAddress = getString(emailAddressId);
-            
+
         } catch (Exception e) {
             emailAddress = "";
         }
@@ -139,8 +139,7 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
         ArrayList<Uri> uris = new ArrayList<Uri>();
 
         // Convert from paths to Android friendly Parcelable Uri's
-        for (String file : Log_OC.getLogFileNames())
-        {
+        for (String file : Log_OC.getLogFileNames()) {
             if (new File(mLogPath + File.separator, file).exists()) {
                 Uri u = Uri.parse("file://" + mLogPath + File.separator + file);
                 uris.add(u);
@@ -150,8 +149,8 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
         Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
 
         // Explicitly only use Gmail to send
-        intent.setClassName("com.google.android.gm","com.google.android.gm.ComposeActivityGmail");
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{ emailAddress });
+        intent.setClassName("com.google.android.gm", "com.google.android.gm.ComposeActivityGmail");
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{emailAddress});
         intent.putExtra(Intent.EXTRA_SUBJECT, getText(R.string.log_mail_subject));
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setType(MAIL_ATTACHMENT_TYPE);
@@ -163,16 +162,14 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
     }
 
     /**
-     *
      * Class for loading the log data async
-     *
      */
     private class LoadingLogTask extends AsyncTask<String, Void, String> {
         private final WeakReference<TextView> textViewReference;
 
-        public LoadingLogTask(TextView logTV){
+        public LoadingLogTask(TextView logTV) {
             // Use of a WeakReference to ensure the TextView can be garbage collected
-            textViewReference  = new WeakReference<TextView>(logTV);
+            textViewReference = new WeakReference<TextView>(logTV);
         }
 
         protected String doInBackground(String... args) {
@@ -203,8 +200,8 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
             try {
                 String line;
 
-                for (int i = logFileName.length-1; i >= 0; i--) {
-                    File file = new File(mLogPath,logFileName[i]);
+                for (int i = logFileName.length - 1; i >= 0; i--) {
+                    File file = new File(mLogPath, logFileName[i]);
                     if (file.exists()) {
                         // Check if FileReader is ready
                         if (new FileReader(file).ready()) {
@@ -217,10 +214,9 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
                         }
                     }
                 }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 Log_OC.d(TAG, e.getMessage().toString());
-                
+
             } finally {
                 if (br != null) {
                     try {
@@ -233,7 +229,7 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
 
             return text.toString();
         }
-   }
+    }
 
     /**
      * Show loading dialog
@@ -251,7 +247,7 @@ public class LogHistoryActivity extends SherlockFragmentActivity  {
     /**
      * Dismiss loading dialog
      */
-    public void dismissLoadingDialog(){
+    public void dismissLoadingDialog() {
         Fragment frag = getSupportFragmentManager().findFragmentByTag(DIALOG_WAIT_TAG);
         if (frag != null) {
             LoadingDialog loading = (LoadingDialog) frag;

@@ -17,8 +17,6 @@
  */
 package com.owncloud.android.ui.fragment;
 
-import java.lang.ref.WeakReference;
-
 import android.accounts.Account;
 import android.content.Intent;
 import android.os.Bundle;
@@ -48,6 +46,8 @@ import com.owncloud.android.ui.activity.FileDisplayActivity;
 import com.owncloud.android.ui.dialog.RemoveFileDialogFragment;
 import com.owncloud.android.ui.dialog.RenameFileDialogFragment;
 import com.owncloud.android.utils.DisplayUtils;
+
+import java.lang.ref.WeakReference;
 
 
 /**
@@ -206,68 +206,53 @@ public class FileDetailFragment extends FileFragment implements OnClickListener 
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_share_file: {
-                mContainerActivity.getFileOperationsHelper().shareFileWithLink(getFile());
-                return true;
+        int i = item.getItemId();
+        if (i == R.id.action_share_file) {
+            mContainerActivity.getFileOperationsHelper().shareFileWithLink(getFile());
+            return true;
+        } else if (i == R.id.action_unshare_file) {
+            mContainerActivity.getFileOperationsHelper().unshareFileWithLink(getFile());
+            return true;
+        } else if (i == R.id.action_open_file_with) {
+            mContainerActivity.getFileOperationsHelper().openFile(getFile());
+            return true;
+        } else if (i == R.id.action_remove_file) {
+            RemoveFileDialogFragment dialog = RemoveFileDialogFragment.newInstance(getFile());
+            dialog.show(getFragmentManager(), FTAG_CONFIRMATION);
+            return true;
+        } else if (i == R.id.action_rename_file) {
+            RenameFileDialogFragment dialog = RenameFileDialogFragment.newInstance(getFile());
+            dialog.show(getFragmentManager(), FTAG_RENAME_FILE);
+            return true;
+        } else if (i == R.id.action_cancel_download || i == R.id.action_cancel_upload) {
+            ((FileDisplayActivity) mContainerActivity).cancelTransference(getFile());
+            return true;
+        } else if (i == R.id.action_download_file || i == R.id.action_sync_file) {
+            mContainerActivity.getFileOperationsHelper().syncFile(getFile());
+            return true;
+        } else if (i == R.id.action_send_file) {
+            if (!getFile().isDown()) {  // Download the file
+                Log_OC.d(TAG, getFile().getRemotePath() + " : File must be downloaded");
+                ((FileDisplayActivity) mContainerActivity).startDownloadForSending(getFile());
+
+            } else {
+                mContainerActivity.getFileOperationsHelper().sendDownloadedFile(getFile());
             }
-            case R.id.action_unshare_file: {
-                mContainerActivity.getFileOperationsHelper().unshareFileWithLink(getFile());
-                return true;
-            }
-            case R.id.action_open_file_with: {
-                mContainerActivity.getFileOperationsHelper().openFile(getFile());
-                return true;
-            }
-            case R.id.action_remove_file: {
-                RemoveFileDialogFragment dialog = RemoveFileDialogFragment.newInstance(getFile());
-                dialog.show(getFragmentManager(), FTAG_CONFIRMATION);
-                return true;
-            }
-            case R.id.action_rename_file: {
-                RenameFileDialogFragment dialog = RenameFileDialogFragment.newInstance(getFile());
-                dialog.show(getFragmentManager(), FTAG_RENAME_FILE);
-                return true;
-            }
-            case R.id.action_cancel_download:
-            case R.id.action_cancel_upload: {
-                ((FileDisplayActivity)mContainerActivity).cancelTransference(getFile());
-                return true;
-            }
-            case R.id.action_download_file: 
-            case R.id.action_sync_file: {
-                mContainerActivity.getFileOperationsHelper().syncFile(getFile());
-                return true;
-            }
-            case R.id.action_send_file: {
-                // Obtain the file
-                if (!getFile().isDown()) {  // Download the file                    
-                    Log_OC.d(TAG, getFile().getRemotePath() + " : File must be downloaded");
-                    ((FileDisplayActivity)mContainerActivity).startDownloadForSending(getFile());
-                    
-                } else {
-                    mContainerActivity.getFileOperationsHelper().sendDownloadedFile(getFile());
-                }
-                return true;
-            }
-            default:
-                return false;
+            return true;
+        } else {
+            return false;
         }
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.fdKeepInSync: {
-                toggleKeepInSync();
-                break;
-            }
-            case R.id.fdCancelBtn: {
-                ((FileDisplayActivity)mContainerActivity).cancelTransference(getFile());
-                break;
-            }
-            default:
-                Log_OC.e(TAG, "Incorrect view clicked!");
+        int i = v.getId();
+        if (i == R.id.fdKeepInSync) {
+            toggleKeepInSync();
+        } else if (i == R.id.fdCancelBtn) {
+            ((FileDisplayActivity) mContainerActivity).cancelTransference(getFile());
+        } else {
+            Log_OC.e(TAG, "Incorrect view clicked!");
         }
     }
     

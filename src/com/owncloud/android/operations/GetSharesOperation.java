@@ -17,19 +17,19 @@
 
 package com.owncloud.android.operations;
 
-import java.util.ArrayList;
-
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.lib.common.utils.Log_OC;
-import com.owncloud.android.lib.resources.shares.OCShare;
 import com.owncloud.android.lib.resources.shares.GetRemoteSharesOperation;
+import com.owncloud.android.lib.resources.shares.OCShare;
 import com.owncloud.android.operations.common.SyncOperation;
+
+import java.util.ArrayList;
 
 /**
  * Access to remote operation to get the share files/folders
  * Save the data in Database
- * 
+ *
  * @author masensio
  * @author David A. Velasco
  */
@@ -48,7 +48,7 @@ public class GetSharesOperation extends SyncOperation {
             // Update DB with the response
             Log_OC.d(TAG, "Share list size = " + result.getData().size());
             ArrayList<OCShare> shares = new ArrayList<OCShare>();
-            for(Object obj: result.getData()) {
+            for (Object obj : result.getData()) {
                 shares.add((OCShare) obj);
             }
 

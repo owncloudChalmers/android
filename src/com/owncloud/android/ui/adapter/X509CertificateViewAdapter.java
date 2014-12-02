@@ -16,6 +16,12 @@
  */
 package com.owncloud.android.ui.adapter;
 
+import android.view.View;
+import android.widget.TextView;
+
+import com.owncloud.android.R;
+import com.owncloud.android.ui.dialog.SslUntrustedCertDialog;
+
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.Date;
@@ -23,12 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
-
-import com.owncloud.android.R;
-import com.owncloud.android.ui.dialog.SslUntrustedCertDialog;
-
-import android.view.View;
-import android.widget.TextView;
 
 /**
  * 

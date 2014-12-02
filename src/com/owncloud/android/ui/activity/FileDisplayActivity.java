@@ -22,6 +22,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -431,7 +432,7 @@ public class FileDisplayActivity extends HookActivity implements
             FileDetailFragment detailsFragment = (FileDetailFragment) secondFragment;
             OCFile fileInFragment = detailsFragment.getFile();
             if (fileInFragment != null && !downloadedRemotePath.equals(fileInFragment.getRemotePath())) {
-                // the user browsed to other file ; forget the automatic preview 
+                // the user browsed to other file ; forget the automatic preview
                 mWaitingToPreview = null;
 
             } else if (downloadEvent.equals(FileDownloader.getDownloadAddedMessage())) {
@@ -512,7 +513,7 @@ public class FileDisplayActivity extends HookActivity implements
                                         sortByDate(false);
                                         break;
 
-// TODO re-enable when server-side folder size calculation is available                       
+// TODO re-enable when server-side folder size calculation is available
 //                    case 2:
 //                        sortBySize(false);
 //                        break;
@@ -555,6 +556,29 @@ public class FileDisplayActivity extends HookActivity implements
             }
             default:
                 retval = super.onOptionsItemSelected(item);
+                int i = item.getItemId();
+                if (i == R.id.action_create_dir) {
+                    CreateFolderDialogFragment dialog =
+                            CreateFolderDialogFragment.newInstance(getCurrentDir());
+                    dialog.show(getSupportFragmentManager(), "createdirdialog");
+                } else if (i == R.id.action_sync_account) {
+                    startSynchronization();
+                } else if (i == R.id.action_upload) {
+                    showDialog(DIALOG_CHOOSE_UPLOAD_SOURCE);
+                } else if (i == R.id.action_settings) {
+                    Intent settingsIntent = new Intent(this, Preferences.class);
+                    startActivity(settingsIntent);
+                } else if (i == android.R.id.home) {
+                    FileFragment second = getSecondFragment();
+                    OCFile currentDir = getCurrentDir();
+                    if ((currentDir != null && currentDir.getParentId() != 0) ||
+                            (second != null && second.getFile() != null)) {
+                        onBackPressed();
+
+                    }
+                } else {
+                    retval = super.onOptionsItemSelected(item);
+                }
         }
         return retval;
     }
@@ -602,8 +626,8 @@ public class FileDisplayActivity extends HookActivity implements
                 browseTo(targetFolder);
             }
 
-            // the next operation triggers a new call to this method, but it's necessary to 
-            // ensure that the name exposed in the action bar is the current directory when the 
+            // the next operation triggers a new call to this method, but it's necessary to
+            // ensure that the name exposed in the action bar is the current directory when the
             // user selected it in the navigation list
             if (getSupportActionBar().getNavigationMode() == ActionBar.NAVIGATION_MODE_LIST && itemPosition != 0)
                 getSupportActionBar().setSelectedNavigationItem(0);
@@ -614,12 +638,21 @@ public class FileDisplayActivity extends HookActivity implements
     /**
      * Called, when the user selected something for uploading
      */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == ACTION_SELECT_CONTENT_FROM_APPS && (resultCode == RESULT_OK || resultCode == UploadFilesActivity.RESULT_OK_AND_MOVE)) {
-            requestSimpleUpload(data, resultCode);
-
+            //getClipData is only supported on api level 16+
+            if (data.getData() == null && Build.VERSION.SDK_INT >= 16) {
+                for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                    Intent intent = new Intent();
+                    intent.setData(data.getClipData().getItemAt(i).getUri());
+                    requestSimpleUpload(intent, resultCode);
+                }
+            } else {
+                requestSimpleUpload(data, resultCode);
+            }
         } else if (requestCode == ACTION_SELECT_MULTIPLE_FILES && (resultCode == RESULT_OK || resultCode == UploadFilesActivity.RESULT_OK_AND_MOVE)) {
             requestMultipleUpload(data, resultCode);
 
@@ -911,6 +944,10 @@ public class FileDisplayActivity extends HookActivity implements
                         } else if (item == 1) {
                             Intent action = new Intent(Intent.ACTION_GET_CONTENT);
                             action = action.setType("*/*").addCategory(Intent.CATEGORY_OPENABLE);
+                            //Intent.EXTRA_ALLOW_MULTIPLE is only supported on api level 18+
+                            if (Build.VERSION.SDK_INT >= 18) {
+                                action.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                            }
                             startActivityForResult(Intent.createChooser(action, getString(R.string.upload_chooser_title)),
                                     ACTION_SELECT_CONTENT_FROM_APPS);
                         }
@@ -1098,7 +1135,7 @@ public class FileDisplayActivity extends HookActivity implements
                         OCFile currentDir = (getCurrentDir() == null) ? null : getStorageManager().getFileByPath(getCurrentDir().getRemotePath());
 
                         if (currentDir == null) {
-                            // current folder was removed from the server 
+                            // current folder was removed from the server
                             Toast.makeText(FileDisplayActivity.this,
                                     String.format(getString(R.string.sync_current_folder_was_removed), mDirectories.getItem(0)),
                                     Toast.LENGTH_LONG)
@@ -1182,7 +1219,7 @@ public class FileDisplayActivity extends HookActivity implements
                     }
                 }
             } catch (RuntimeException e) {
-                // avoid app crashes after changing the serial id of RemoteOperationResult 
+                // avoid app crashes after changing the serial id of RemoteOperationResult
                 // in owncloud library with broadcast notifications pending to process
                 removeStickyBroadcast(intent);
             }
@@ -1260,10 +1297,16 @@ public class FileDisplayActivity extends HookActivity implements
                         cleanSecondFragment();
                     }
 
-                    // Force the preview if the file is an image
-                    if (uploadWasFine && PreviewImageFragment.canBePreviewed(getFile())) {
-                        startImagePreview(getFile());
-                    } // TODO what about other kind of previews?
+                    // Force the preview if the file is an image or text file
+                    if (uploadWasFine) {
+                        OCFile ocFile = getFile();
+                        if (PreviewImageFragment.canBePreviewed(ocFile))
+                            startImagePreview(getFile());
+                        else if (PreviewTextFragment.canBePreviewed(ocFile))
+                            startTextPreview(ocFile);
+                        // TODO what about other kind of previews?
+                    }
+
                 }
 
             } finally {
@@ -1571,10 +1614,13 @@ public class FileDisplayActivity extends HookActivity implements
                     ((PreviewTextFragment) details).updateFile(file);
                 } else
                     showDetails(file);
-                }
+
             }
-            invalidateOptionsMenu();
         }
+
+        invalidateOptionsMenu();
+    }
+
 
     /**
      * Updates the view associated to the activity after the finish of an operation trying to remove a

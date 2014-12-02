@@ -24,7 +24,9 @@ package com.owncloud.android.ui.dialog;
  *  
  *  @author David A. Velasco
  */
-import java.util.Vector;
+
+import android.app.Dialog;
+import android.os.Bundle;
 
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.FileDataStorageManager;
@@ -32,8 +34,7 @@ import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.ui.activity.ComponentsGetter;
 import com.owncloud.android.ui.dialog.ConfirmationDialogFragment.ConfirmationDialogFragmentListener;
 
-import android.app.Dialog;
-import android.os.Bundle;
+import java.util.Vector;
 
 public class RemoveFileDialogFragment extends ConfirmationDialogFragment 
 implements ConfirmationDialogFragmentListener {

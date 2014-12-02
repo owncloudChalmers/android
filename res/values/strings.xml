@@ -15,10 +15,10 @@
     <string name="actionbar_sort">Sort</string>
     <string name="actionbar_sort_title">Sort by</string>
     <string-array name="actionbar_sortby">
-    	<item>A-Z</item>
-    	<item>Newest - Oldest</item>
-    	<!-- TODO re-enable when server-side folder size calculation is available   
-    	<item>Biggest - Smallest</item>  -->
+        <item>A-Z</item>
+        <item>Newest - Oldest</item>
+        <!-- TODO re-enable when server-side folder size calculation is available
+        <item>Biggest - Smallest</item>  -->
     </string-array>
     <string name="prefs_category_general">General</string>
     <string name="prefs_category_more">More</string>
@@ -44,7 +44,8 @@
     <string name="prefs_remember_last_share_location">Remember share location</string>
     <string name="prefs_remember_last_upload_location_summary">Remember last share upload location</string>
     <string name="recommend_subject">"Try %1$s on your smartphone!"</string>
-    <string name="recommend_text">"I want to invite you to use %1$s on your smartphone!\nDownload here: %2$s"</string>
+	<string name="recommend_text">"I want to invite you to use %1$s on your smartphone!\nDownload here: %2$s"
+	</string>
     <string name="auth_check_server">Check Server</string>
     <string name="auth_host_url">Server address https://…</string>
     <string name="auth_username">Username</string>
@@ -297,7 +298,7 @@
     <string name="prefs_add_account">Add account</string>
     <string name="auth_redirect_non_secure_connection_title">Secure connection is redirected through an unsecured route.</string>
 
-	<string name="actionbar_logger">Logs</string>
+    <string name="actionbar_logger">Logs</string>
     <string name="log_send_history_button">Send History</string>
     <string name="log_mail_subject">ownCloud Android app logs</string>
     <string name="log_progress_dialog_text">Loading data...</string>
@@ -319,7 +320,6 @@
     <string name="copy_file_invalid_overwrite">The file exists already in the destination folder</string>
     <string name="copy_file_error">An error occurred while trying to copy this file or folder</string>
     <string name="forbidden_permissions_copy">to copy this file</string>
-
-	<string name="prefs_category_instant_uploading">Instant Uploads</string>
-	<string name="prefs_category_security">Security</string>
+    <string name="prefs_category_instant_uploading">Instant Uploads</string>
+    <string name="prefs_category_security">Security</string>
 </resources>

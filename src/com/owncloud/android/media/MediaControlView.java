@@ -37,10 +37,10 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.owncloud.android.R;
+
 import java.util.Formatter;
 import java.util.Locale;
-
-import com.owncloud.android.R;
 
 
 /**
@@ -392,28 +392,24 @@ public class MediaControlView extends FrameLayout /* implements OnLayoutChangeLi
     public void onClick(View v) {
         int pos;
         boolean playing = mPlayer.isPlaying();
-        switch (v.getId()) {
-        
-        case R.id.playBtn: 
+        int i = v.getId();
+        if (i == R.id.playBtn) {
             doPauseResume();
-            break;
 
-        case R.id.rewindBtn:
+        } else if (i == R.id.rewindBtn) {
             pos = mPlayer.getCurrentPosition();
             pos -= 5000;
             mPlayer.seekTo(pos);
-            if (!playing) mPlayer.pause();  // necessary in some 2.3.x devices 
+            if (!playing) mPlayer.pause();  // necessary in some 2.3.x devices
             setProgress();
-            break;
 
-        case R.id.forwardBtn:
+        } else if (i == R.id.forwardBtn) {
             pos = mPlayer.getCurrentPosition();
             pos += 15000;
             mPlayer.seekTo(pos);
             if (!playing) mPlayer.pause(); // necessary in some 2.3.x devices
             setProgress();
-            break;
-        
+
         }
     }
     

@@ -139,6 +139,7 @@ public class FileActivity extends SherlockFragmentActivity
     private int mWaitingOperations = 0;
     
 
+
     /**
      * Loads the ownCloud {@link Account} and main {@link OCFile} to be handled by the instance of
      * the {@link FileActivity}.
@@ -550,7 +551,6 @@ public class FileActivity extends SherlockFragmentActivity
         }
         //increment the number of waiting operations
         mWaitingOperations++;
-        
 
     }
 
@@ -558,12 +558,11 @@ public class FileActivity extends SherlockFragmentActivity
     /**
      * Dismiss loading dialog
      */
-
     public void dismissLoadingDialog(){
         //Decrease the number of waiting operations
         if( mWaitingOperations > 0)
             mWaitingOperations--;
-        
+
         //If waiting operations is 0, dismiss the dialog
         if(mWaitingOperations == 0) {
             Fragment frag = getSupportFragmentManager().findFragmentByTag(DIALOG_WAIT_TAG);
