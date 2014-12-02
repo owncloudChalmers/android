@@ -1575,7 +1575,6 @@ public class FileDisplayActivity extends HookActivity implements
             }
             invalidateOptionsMenu();
         }
-    }
 
     /**
      * Updates the view associated to the activity after the finish of an operation trying to remove a

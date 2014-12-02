@@ -316,6 +316,7 @@ public class OCFileListFragment extends ExtendedListFragment {
                     mContainerActivity.getFileOperationsHelper().syncFile(mTargetFile);  
                 }
                 
+
                 return true;
             }
             case R.id.action_cancel_download:
