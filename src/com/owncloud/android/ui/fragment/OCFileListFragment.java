@@ -39,6 +39,7 @@ import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.files.FileMenuFilter;
 import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.ui.activity.CopyActivity;
 import com.owncloud.android.ui.activity.FileDisplayActivity;
 import com.owncloud.android.ui.activity.MoveActivity;
 import com.owncloud.android.ui.activity.OnEnforceableRefreshListener;
@@ -95,7 +96,7 @@ public class OCFileListFragment extends ExtendedListFragment {
                     FileFragment.ContainerActivity.class.getSimpleName());
         }
         try {
-            setOnRefreshListener((OnEnforceableRefreshListener) activity);
+            setOnRefreshListener((SwipeRefreshLayout.OnRefreshListener) activity);
             
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement " + 
@@ -340,6 +341,13 @@ public class OCFileListFragment extends ExtendedListFragment {
                 getActivity().startActivityForResult(action, FileDisplayActivity.ACTION_MOVE_FILES);
                 return true;
             }
+            case R.id.action_copy:
+                Intent action = new Intent(getActivity(), CopyActivity.class);
+
+                // Pass mTargetFile that contains info of selected file/folder
+                action.putExtra(CopyActivity.EXTRA_TARGET_FILE, mTargetFile);
+                getActivity().startActivityForResult(action, FileDisplayActivity.ACTION_COPY_FILES);
+                return true;
             default:
                 return super.onContextItemSelected(item); 
         }

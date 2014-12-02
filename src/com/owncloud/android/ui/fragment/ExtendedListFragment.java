@@ -64,7 +64,7 @@ implements OnItemClickListener, OnEnforceableRefreshListener {
     private ArrayList<Integer> mTops;
     private int mHeightCell = 0;
 
-    private OnEnforceableRefreshListener mOnRefreshListener = null;
+    private SwipeRefreshLayout.OnRefreshListener mOnRefreshListener = null;
     
     
     public void setListAdapter(ListAdapter listAdapter) {
@@ -245,7 +245,9 @@ implements OnItemClickListener, OnEnforceableRefreshListener {
             mOnRefreshListener.onRefresh();
         }
     }
-    public void setOnRefreshListener(OnEnforceableRefreshListener listener) {
+
+    
+    public void setOnRefreshListener(SwipeRefreshLayout.OnRefreshListener listener) {
         mOnRefreshListener = listener;
     }
     
@@ -311,7 +313,7 @@ implements OnItemClickListener, OnEnforceableRefreshListener {
         mRefreshEmptyLayout.setRefreshing(false);
 
         if (mOnRefreshListener != null) {
-            mOnRefreshListener.onRefresh(ignoreETag);
+            mOnRefreshListener.onRefresh();
         }
     }
 }
