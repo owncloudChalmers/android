@@ -87,17 +87,17 @@ public class ThumbnailsCacheManager {
 
                 if (mThumbnailCache == null) {
                     try {
-                        // Check if media is mounted or storage is built-in, if so, 
+                        // Check if media is mounted or storage is built-in, if so,
                         // try and use external cache dir; otherwise use internal cache dir
-                        final String cachePath = 
-                                MainApp.getAppContext().getExternalCacheDir().getPath() + 
+                        final String cachePath =
+                                MainApp.getAppContext().getExternalCacheDir().getPath() +
                                 File.separator + CACHE_FOLDER;
                         Log_OC.d(TAG, "create dir: " + cachePath);
                         final File diskCacheDir = new File(cachePath);
                         mThumbnailCache = new DiskLruImageCache(
-                                diskCacheDir, 
-                                DISK_CACHE_SIZE, 
-                                mCompressFormat, 
+                                diskCacheDir,
+                                DISK_CACHE_SIZE,
+                                mCompressFormat,
                                 mCompressQuality
                         );
                     } catch (Exception e) {
@@ -111,8 +111,8 @@ public class ThumbnailsCacheManager {
             return null;
         }
     }
-    
-    
+
+
     public static void addBitmapToCache(String key, Bitmap bitmap) {
         synchronized (mThumbnailsDiskCacheLock) {
             if (mThumbnailCache != null) {
@@ -137,9 +137,19 @@ public class ThumbnailsCacheManager {
         return null;
     }
 
+    public static boolean cancelPotentialWork(String file, ImageView imageView) {
+        final AsyncTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+
+        if (bitmapWorkerTask != null) {
+            // The same work is already in progress
+            return false;
+        }
+        // No task associated with the ImageView, or an existing task was cancelled
+        return true;
+    }
     
     public static boolean cancelPotentialWork(OCFile file, ImageView imageView) {
-        final ThumbnailGenerationTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+        final ThumbnailGenerationTask bitmapWorkerTask = (ThumbnailGenerationTask) getBitmapWorkerTask(imageView);
 
         if (bitmapWorkerTask != null) {
             final OCFile bitmapData = bitmapWorkerTask.mFile;
@@ -155,8 +165,8 @@ public class ThumbnailsCacheManager {
         // No task associated with the ImageView, or an existing task was cancelled
         return true;
     }
-    
-    public static ThumbnailGenerationTask getBitmapWorkerTask(ImageView imageView) {
+
+    public static AsyncTask getBitmapWorkerTask(ImageView imageView) {
         if (imageView != null) {
             final Drawable drawable = imageView.getDrawable();
             if (drawable instanceof AsyncDrawable) {
@@ -166,6 +176,75 @@ public class ThumbnailsCacheManager {
          }
          return null;
      }
+
+    public static class LocalThumbnailGenerationTask extends AsyncTask<String, Void, Bitmap> {
+        private final WeakReference<ImageView> mImageViewReference;
+        private String mFile;
+
+        public LocalThumbnailGenerationTask(ImageView imageView) {
+            // Use a WeakReference to ensure the ImageView can be garbage collected
+            mImageViewReference = new WeakReference<ImageView>(imageView);
+        }
+
+        // Decode image in background.
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            Bitmap thumbnail = null;
+
+            try {
+                mFile = params[0];
+                final String imageKey = String.valueOf(mFile);
+
+                // Check disk cache in background thread
+                thumbnail = getBitmapFromDiskCache(imageKey);
+
+                // Not found in disk cache
+                if (thumbnail == null) {
+                    // Converts dp to pixel
+                    Resources r = MainApp.getAppContext().getResources();
+                    int px = (int) Math.round(r.getDimension(R.dimen.file_icon_size));
+
+                    Bitmap bitmap = BitmapUtils.decodeSampledBitmapFromFile(
+                            mFile, px, px);
+
+                    if (bitmap != null) {
+                        thumbnail = ThumbnailUtils.extractThumbnail(bitmap, px, px);
+
+                        // Add thumbnail to cache
+                        addBitmapToCache(imageKey, thumbnail);
+                    } else {
+                        Log_OC.e(TAG, "Generation of thumbnail for " + mFile + " failed");
+                    }
+                }
+
+            } catch (Throwable t) {
+                // the app should never break due to a problem with thumbnails
+                Log_OC.e(TAG, "Generation of thumbnail for " + mFile + " failed", t);
+                if (t instanceof OutOfMemoryError) {
+                    System.gc();
+                }
+            }
+
+            return thumbnail;
+        }
+
+        protected void onPostExecute(Bitmap bitmap){
+            if (isCancelled()) {
+                bitmap = null;
+            }
+
+            if (mImageViewReference != null && bitmap != null) {
+                final ImageView imageView = mImageViewReference.get();
+                final AsyncTask bitmapWorkerTask =
+                        getBitmapWorkerTask(imageView);
+                if (this == bitmapWorkerTask && imageView != null) {
+                    if (imageView.getTag().equals(mFile)) {
+                        imageView.setImageBitmap(bitmap);
+                    }
+                }
+            }
+        }
+    }
 
     public static class ThumbnailGenerationTask extends AsyncTask<OCFile, Void, Bitmap> {
         private final WeakReference<ImageView> mImageViewReference;
@@ -198,7 +277,7 @@ public class ThumbnailsCacheManager {
                 }
                 
                 mFile = params[0];
-                final String imageKey = String.valueOf(mFile.getRemoteId());
+                final String imageKey = String.valueOf(mFile.getStoragePath());
     
                 // Check disk cache in background thread
                 thumbnail = getBitmapFromDiskCache(imageKey);
@@ -275,7 +354,7 @@ public class ThumbnailsCacheManager {
 
             if (mImageViewReference != null && bitmap != null) {
                 final ImageView imageView = mImageViewReference.get();
-                final ThumbnailGenerationTask bitmapWorkerTask =
+                final AsyncTask bitmapWorkerTask =
                         getBitmapWorkerTask(imageView);
                 if (this == bitmapWorkerTask && imageView != null) {
                     if (imageView.getTag().equals(mFile.getFileId())) {
@@ -288,18 +367,18 @@ public class ThumbnailsCacheManager {
   
     
     public static class AsyncDrawable extends BitmapDrawable {
-        private final WeakReference<ThumbnailGenerationTask> bitmapWorkerTaskReference;
+        private final WeakReference<AsyncTask> bitmapWorkerTaskReference;
 
         public AsyncDrawable(
-                Resources res, Bitmap bitmap, ThumbnailGenerationTask bitmapWorkerTask
+                Resources res, Bitmap bitmap, AsyncTask bitmapWorkerTask
             ) {
             
             super(res, bitmap);
             bitmapWorkerTaskReference =
-                new WeakReference<ThumbnailGenerationTask>(bitmapWorkerTask);
+                new WeakReference<AsyncTask>(bitmapWorkerTask);
         }
 
-        public ThumbnailGenerationTask getBitmapWorkerTask() {
+        public AsyncTask getBitmapWorkerTask() {
             return bitmapWorkerTaskReference.get();
         }
     }
