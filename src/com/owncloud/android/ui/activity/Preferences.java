@@ -265,6 +265,32 @@ public class Preferences extends SherlockPreferenceActivity implements AccountMa
                    Log_OC.e(TAG, "Error while showing about dialog", e);
                }
        }
+
+
+        final CheckBoxPreference pInstantUpload = (CheckBoxPreference) findPreference("instant_uploading");
+        final CheckBoxPreference pInstantVideoUpload = (CheckBoxPreference) findPreference("instant_video_uploading");
+        final CheckBoxPreference pInstantUploadNoLocal = (CheckBoxPreference) findPreference("instant_upload_no_local");
+
+        pInstantUploadNoLocal.setEnabled(pInstantVideoUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
+                || pInstantUpload.getSharedPreferences().getBoolean(pInstantUpload.getKey(), false));
+
+        pInstantUpload.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                pInstantUploadNoLocal.setEnabled(pInstantVideoUpload.getSharedPreferences().getBoolean(pInstantVideoUpload.getKey(), false)
+                        || (Boolean)newValue);
+                return true;
+            }
+        });
+
+        pInstantVideoUpload.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                pInstantUploadNoLocal.setEnabled(pInstantUpload.getSharedPreferences().getBoolean(pInstantUpload.getKey(), false)
+                        || (Boolean)newValue);
+                return true;
+            }
+        });
     }
 
     @Override

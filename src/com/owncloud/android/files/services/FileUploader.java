@@ -96,6 +96,7 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
     public static final String KEY_UPLOAD_TYPE = "UPLOAD_TYPE";
     public static final String KEY_FORCE_OVERWRITE = "KEY_FORCE_OVERWRITE";
     public static final String KEY_INSTANT_UPLOAD = "INSTANT_UPLOAD";
+    public static final String KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL = "INSTANT_UPLOAD_REMOVE_ORIGINAL";
     public static final String KEY_LOCAL_BEHAVIOUR = "BEHAVIOUR";
 
     public static final int LOCAL_BEHAVIOUR_COPY = 0;
@@ -228,6 +229,7 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
 
         boolean forceOverwrite = intent.getBooleanExtra(KEY_FORCE_OVERWRITE, false);
         boolean isInstant = intent.getBooleanExtra(KEY_INSTANT_UPLOAD, false);
+        boolean removeInstantOriginal = intent.getBooleanExtra(KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, false);
         int localAction = intent.getIntExtra(KEY_LOCAL_BEHAVIOUR, LOCAL_BEHAVIOUR_COPY);
         
         if (intent.hasExtra(KEY_FILE) && files == null) {
@@ -270,8 +272,8 @@ public class FileUploader extends Service implements OnDatatransferProgressListe
         try {
             for (int i = 0; i < files.length; i++) {
                 uploadKey = buildRemoteName(account, files[i].getRemotePath());
-                newUpload = new UploadFileOperation(account, files[i], chunked, isInstant, forceOverwrite, localAction, 
-                        getApplicationContext());
+                newUpload = new UploadFileOperation(account, files[i], chunked, isInstant, removeInstantOriginal,
+                        forceOverwrite, localAction, getApplicationContext());
                 if (isInstant) {
                     newUpload.setRemoteFolderToBeCreated();
                 }

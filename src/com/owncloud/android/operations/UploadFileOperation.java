@@ -52,6 +52,18 @@ import com.owncloud.android.lib.resources.files.UploadRemoteFileOperation;
 import com.owncloud.android.utils.FileStorageUtils;
 import com.owncloud.android.utils.UriUtils;
 
+import android.accounts.Account;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.webkit.MimeTypeMap;
+
 
 /**
  * Remote operation performing the upload of a file to an ownCloud server
@@ -72,6 +84,7 @@ public class UploadFileOperation extends RemoteOperation {
     private boolean mForceOverwrite = false;
     private int mLocalBehaviour = FileUploader.LOCAL_BEHAVIOUR_COPY;
     private boolean mWasRenamed = false;
+    private boolean mRemoveInstantOriginal = false;
     private String mOriginalFileName = null;
     private String mOriginalStoragePath = null;
     PutMethod mPutMethod = null;
@@ -88,6 +101,7 @@ public class UploadFileOperation extends RemoteOperation {
                                 OCFile file,
                                 boolean chunked,
                                 boolean isInstant, 
+                                boolean removeInstantOriginal,
                                 boolean forceOverwrite,
                                 int localBehaviour, 
                                 Context context) {
@@ -106,6 +120,7 @@ public class UploadFileOperation extends RemoteOperation {
         mRemotePath = file.getRemotePath();
         mChunked = chunked;
         mIsInstant = isInstant;
+        mRemoveInstantOriginal = removeInstantOriginal;
         mForceOverwrite = forceOverwrite;
         mLocalBehaviour = localBehaviour;
         mOriginalStoragePath = mFile.getStoragePath();
@@ -148,6 +163,8 @@ public class UploadFileOperation extends RemoteOperation {
     public boolean isInstant() {
         return mIsInstant;
     }
+
+    public boolean isRemoveInstantOriginal() { return mRemoveInstantOriginal; }
 
     public boolean isRemoteFolderToBeCreated() {
         return mRemoteFolderToBeCreated;
@@ -372,6 +389,27 @@ public class UploadFileOperation extends RemoteOperation {
                 } else {
                     Log_OC.e(TAG, "Upload of " + mOriginalStoragePath + " to " + mRemotePath + ": " + result.getLogMessage());
                 }
+            }
+        }
+
+        if(mIsInstant && mRemoveInstantOriginal && result.isSuccess()){
+            boolean fileDeleteResult;
+
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    originalFile.getName().substring(originalFile.getName().lastIndexOf('.') + 1));
+
+            if (mimeType.startsWith("image/")) {
+                fileDeleteResult = FileStorageUtils.deleteImageFile(mContext, originalFile);
+            } else if(mimeType.startsWith("video/")) {
+                fileDeleteResult = FileStorageUtils.deleteVideoFile(mContext, originalFile);
+            } else {
+                fileDeleteResult = originalFile.delete();
+            }
+
+            if(fileDeleteResult) {
+                Log.wtf(TAG, "Deleted instantly uploaded file: " + originalFile.getAbsolutePath());
+            } else {
+                Log.wtf(TAG, "Failed to delete instantly uploaded file: " + originalFile.getAbsolutePath());
             }
         }
 
