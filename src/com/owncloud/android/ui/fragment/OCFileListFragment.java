@@ -40,7 +40,7 @@ import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.files.FileMenuFilter;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.ui.activity.FileDisplayActivity;
-import com.owncloud.android.ui.activity.MoveActivity;
+import com.owncloud.android.ui.activity.FolderPickerActivity;
 import com.owncloud.android.ui.activity.OnEnforceableRefreshListener;
 import com.owncloud.android.ui.adapter.FileListListAdapter;
 import com.owncloud.android.ui.dialog.ConfirmationDialogFragment;
@@ -48,6 +48,7 @@ import com.owncloud.android.ui.dialog.RemoveFileDialogFragment;
 import com.owncloud.android.ui.dialog.RenameFileDialogFragment;
 import com.owncloud.android.ui.preview.PreviewImageFragment;
 import com.owncloud.android.ui.preview.PreviewMediaFragment;
+import com.owncloud.android.ui.preview.PreviewTextFragment;
 
 /**
  * A Fragment that lists all files and folders in a given path.
@@ -210,7 +211,8 @@ public class OCFileListFragment extends ExtendedListFragment {
                 if (PreviewImageFragment.canBePreviewed(file)) {
                     // preview image - it handles the download, if needed
                     ((FileDisplayActivity)mContainerActivity).startImagePreview(file);
-                    
+                } else if (PreviewTextFragment.canBePreviewed(file)){
+                    ((FileDisplayActivity)mContainerActivity).startTextPreview(file);
                 } else if (file.isDown()) {
                     if (PreviewMediaFragment.canBePreviewed(file)) {
                         // media preview
@@ -341,10 +343,10 @@ public class OCFileListFragment extends ExtendedListFragment {
                 return true;
             }
             case R.id.action_move: {
-                Intent action = new Intent(getActivity(), MoveActivity.class);
+                Intent action = new Intent(getActivity(), FolderPickerActivity.class);
 
                 // Pass mTargetFile that contains info of selected file/folder
-                action.putExtra(MoveActivity.EXTRA_TARGET_FILE, mTargetFile);
+                action.putExtra(FolderPickerActivity.EXTRA_FILE, mTargetFile);
                 getActivity().startActivityForResult(action, FileDisplayActivity.ACTION_MOVE_FILES);
                 return true;
             }

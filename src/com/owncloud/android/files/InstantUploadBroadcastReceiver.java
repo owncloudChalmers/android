@@ -18,16 +18,6 @@
 
 package com.owncloud.android.files;
 
-import java.io.File;
-
-import com.owncloud.android.MainApp;
-import com.owncloud.android.authentication.AccountUtils;
-import com.owncloud.android.db.DbHandler;
-import com.owncloud.android.files.services.FileUploader;
-import com.owncloud.android.lib.common.utils.Log_OC;
-import com.owncloud.android.utils.FileStorageUtils;
-
-
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,6 +30,15 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
 import android.webkit.MimeTypeMap;
+
+import com.owncloud.android.MainApp;
+import com.owncloud.android.authentication.AccountUtils;
+import com.owncloud.android.db.DbHandler;
+import com.owncloud.android.files.services.FileUploader;
+import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.utils.FileStorageUtils;
+
+import java.io.File;
 
 
 public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
@@ -54,7 +53,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
     // Officially supported action since SDK 14: http://developer.android.com/reference/android/hardware/Camera.html#ACTION_NEW_VIDEO
     private static String NEW_VIDEO_ACTION = "android.hardware.action.NEW_VIDEO";
 
-    
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -65,10 +64,10 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
         } else if (action.equals(NEW_PHOTO_ACTION_UNOFFICIAL)) {
             Log_OC.d(TAG, "UNOFFICIAL processed: com.android.camera.NEW_PICTURE");
             handleInstantUploadAction(context, intent);
-        } else if(action.equals(NEW_PHOTO_ACTION)) {
+        } else if (action.equals(NEW_PHOTO_ACTION)) {
             Log_OC.d(TAG, "OFFICIAL processed: android.hardware.action.NEW_PICTURE");
             handleInstantUploadAction(context, intent);
-        } else if(action.equals(NEW_VIDEO_ACTION)) {
+        } else if (action.equals(NEW_VIDEO_ACTION)) {
             Log_OC.d(TAG, "OFFICIAL processed: android.hardware.action.NEW_VIDEO");
             handleInstantUploadAction(context, intent);
         } else {
@@ -99,7 +98,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
                 return;
             }
 
-            CONTENT_PROJECTION = new String[]{ Video.Media.DATA, Video.Media.DISPLAY_NAME, Video.Media.MIME_TYPE, Video.Media.SIZE };
+            CONTENT_PROJECTION = new String[]{Video.Media.DATA, Video.Media.DISPLAY_NAME, Video.Media.MIME_TYPE, Video.Media.SIZE};
             data = Video.Media.DATA;
         } else if (isImageAction(intent.getAction())) {
             Log_OC.w(TAG, "New photo received");
@@ -110,7 +109,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
                 return;
             }
 
-            CONTENT_PROJECTION = new String[]{ Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE };
+            CONTENT_PROJECTION = new String[]{Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE};
             data = Images.Media.DATA;
         }
 
@@ -186,11 +185,13 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
 
                     // Intent information indicating that no local files should be stored
                     SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(context);
-                    if(pm.getBoolean("instant_upload_no_local", false)){
+                    if (pm.getBoolean("instant_upload_no_local", false)) {
                         i.putExtra(FileUploader.KEY_INSTANT_UPLOAD_REMOVE_ORIGINAL, true);
                         i.putExtra(FileUploader.KEY_LOCAL_BEHAVIOUR, FileUploader.LOCAL_BEHAVIOUR_FORGET);
                     }
-
+                    if (!isOnline(context) || (instantVideoUploadViaWiFiOnly(context) && !isConnectedViaWiFi(context))) {
+                        return;
+                    }
                     context.startService(i);
                 } else {
                     Log_OC.w(TAG, "Instant upload file " + f.getAbsolutePath() + " don't exist anymore");
@@ -241,7 +242,7 @@ public class InstantUploadBroadcastReceiver extends BroadcastReceiver {
     public static boolean instantPictureUploadViaWiFiOnly(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("instant_upload_on_wifi", false);
     }
-    
+
     public static boolean instantVideoUploadViaWiFiOnly(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("instant_video_upload_on_wifi", false);
     }

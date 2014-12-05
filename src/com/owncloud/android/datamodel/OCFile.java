@@ -27,7 +27,6 @@ import com.owncloud.android.lib.common.utils.Log_OC;
 import java.io.File;
 
 import third_parties.daveKoeller.AlphanumComparator;
-
 public class OCFile implements Parcelable, Comparable<OCFile> {
 
     public static final Parcelable.Creator<OCFile> CREATOR = new Parcelable.Creator<OCFile>() {
@@ -448,7 +447,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
 
     @Override
     public int describeContents() {
-        return ((Object) this).hashCode();
+        return super.hashCode();
     }
 
     @Override
@@ -537,6 +536,13 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
                 getMimeTypeFromName().startsWith("image/"));
     }
 
+    /**
+     * @return 'True' if the file is simple text (e.g. not application-dependent, like .doc or .docx)
+     */
+    public boolean isText() {
+        return ((mMimeType != null && mMimeType.startsWith("text/")) || getMimeTypeFromName().startsWith("text/"));
+    }
+
     public String getMimeTypeFromName() {
         String extension = "";
         int pos = mRemotePath.lastIndexOf('.');
@@ -562,5 +568,4 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
     public void setRemoteId(String remoteId) {
         this.mRemoteId = remoteId;
     }
-
 }
