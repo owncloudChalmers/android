@@ -82,6 +82,7 @@ import com.owncloud.android.lib.common.operations.RemoteOperation;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult.ResultCode;
 import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.operations.CopyFileOperation;
 import com.owncloud.android.operations.CreateFolderOperation;
 import com.owncloud.android.operations.CreateShareOperation;
 import com.owncloud.android.operations.MoveFileOperation;
@@ -147,6 +148,7 @@ public class FileDisplayActivity extends HookActivity implements
     private static final int ACTION_SELECT_CONTENT_FROM_APPS = 1;
     private static final int ACTION_SELECT_MULTIPLE_FILES = 2;
     public static final int ACTION_MOVE_FILES = 3;
+    public static final int ACTION_COPY_FILES = 4;
 
     private static final String TAG = FileDisplayActivity.class.getSimpleName();
 
@@ -637,9 +639,19 @@ public class FileDisplayActivity extends HookActivity implements
             }
         } else if (requestCode == ACTION_SELECT_MULTIPLE_FILES && (resultCode == RESULT_OK || resultCode == UploadFilesActivity.RESULT_OK_AND_MOVE)) {
             requestMultipleUpload(data, resultCode);
-
         } else if (requestCode == ACTION_MOVE_FILES && resultCode == RESULT_OK) {
-
+            final Intent fData = data;
+            final int fResultCode = resultCode;
+            getHandler().postDelayed(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            requestMoveOperation(fData, fResultCode);
+                        }
+                    },
+                    DELAY_TO_REQUEST_OPERATION_ON_ACTIVITY_RESULTS
+            );
+        } else if (requestCode == ACTION_COPY_FILES && resultCode == RESULT_OK) {
             final Intent fData = data;
             final int fResultCode = resultCode;
             getHandler().postDelayed(
@@ -769,6 +781,18 @@ public class FileDisplayActivity extends HookActivity implements
         OCFile folderToMoveAt = (OCFile) data.getParcelableExtra(FolderPickerActivity.EXTRA_FOLDER);
         OCFile targetFile = (OCFile) data.getParcelableExtra(FolderPickerActivity.EXTRA_FILE);
         getFileOperationsHelper().moveFile(folderToMoveAt, targetFile);
+    }
+
+    /**
+     * Request the operation for copying the file/folder from one path to another
+     *
+     * @param data       Intent received
+     * @param resultCode Result code received
+     */
+    private void requestCopyOperation(Intent data, int resultCode) {
+        OCFile folderToMoveAt = data.getParcelableExtra(FolderPickerActivity.EXTRA_FOLDER);
+        OCFile targetFile = data.getParcelableExtra(FolderPickerActivity.EXTRA_FILE);
+        getFileOperationsHelper().copyFile(folderToMoveAt, targetFile);
     }
 
     @Override
@@ -903,11 +927,6 @@ public class FileDisplayActivity extends HookActivity implements
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                                 action.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                             }
-                            startActivityForResult(Intent.createChooser(action, getString(R.string.upload_chooser_title)),
-                                    ACTION_SELECT_CONTENT_FROM_APPS);
-                        } else if (item == 1) {
-                            Intent action = new Intent(Intent.ACTION_GET_CONTENT);
-                            action = action.setType("*/*").addCategory(Intent.CATEGORY_OPENABLE);
                             startActivityForResult(Intent.createChooser(action, getString(R.string.upload_chooser_title)),
                                     ACTION_SELECT_CONTENT_FROM_APPS);
                         }
@@ -1254,7 +1273,6 @@ public class FileDisplayActivity extends HookActivity implements
                     } else {
                         cleanSecondFragment();
                     }
-
                     // Force the preview if the file is an image or text file
                     if (uploadWasFine) {
                         OCFile ocFile = getFile();
@@ -1530,6 +1548,8 @@ public class FileDisplayActivity extends HookActivity implements
 
         } else if (operation instanceof MoveFileOperation) {
             onMoveFileOperationFinish((MoveFileOperation) operation, result);
+        } else if (operation instanceof CopyFileOperation) {
+            onCopyFileOperationFinish((CopyFileOperation) operation, result);
         }
 
     }
@@ -1635,6 +1655,30 @@ public class FileDisplayActivity extends HookActivity implements
         }
     }
 
+    /**
+     * Updates the view associated to the activity after the finish of an operation trying to copy a
+     * file.
+     *
+     * @param operation Copy operation performed.
+     * @param result    Result of the copy operation.
+     */
+    private void onCopyFileOperationFinish(CopyFileOperation operation, RemoteOperationResult result) {
+        if (result.isSuccess()) {
+            dismissLoadingDialog();
+            refreshListOfFilesFragment();
+        } else {
+            dismissLoadingDialog();
+            try {
+                Toast msg = Toast.makeText(FileDisplayActivity.this,
+                        ErrorMessageAdapter.getErrorCauseMessage(result, operation, getResources()),
+                        Toast.LENGTH_LONG);
+                msg.show();
+
+            } catch (NotFoundException e) {
+                Log_OC.e(TAG, "Error while trying to show fail message ", e);
+            }
+        }
+    }
 
     /**
      * Updates the view associated to the activity after the finish of an operation trying to rename a
