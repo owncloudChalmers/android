@@ -658,7 +658,7 @@ public class FileDisplayActivity extends HookActivity implements
                     new Runnable() {
                         @Override
                         public void run() {
-                            requestMoveOperation(fData, fResultCode);
+                            requestCopyOperation(fData, fResultCode);
                         }
                     },
                     DELAY_TO_REQUEST_OPERATION_ON_ACTIVITY_RESULTS
