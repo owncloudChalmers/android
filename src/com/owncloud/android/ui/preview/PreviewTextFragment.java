@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 
 public class PreviewTextFragment extends FileFragment {
@@ -42,10 +45,10 @@ public class PreviewTextFragment extends FileFragment {
 
     /**
      * Creates an empty fragment for previews.
-     * <p/>
+     * <p>
      * MUST BE KEPT: the system uses it when tries to reinstantiate a fragment automatically
      * (for instance, when the device is turned a aside).
-     * <p/>
+     * <p>
      * DO NOT CALL IT: an {@link OCFile} and {@link Account} must be provided for a successful
      * construction
      */
@@ -97,7 +100,8 @@ public class PreviewTextFragment extends FileFragment {
             if (mAccount == null) {
                 throw new IllegalStateException("Instanced with a NULL ownCloud Account");
             }
-        } else {
+        }
+        else {
             file = savedInstanceState.getParcelable(EXTRA_FILE);
             mAccount = savedInstanceState.getParcelable(EXTRA_ACCOUNT);
         }
@@ -162,11 +166,15 @@ public class PreviewTextFragment extends FileFragment {
                 sc = new Scanner(inputStream);
                 while (sc.hasNextLine()) {
                     bufferedWriter.append(sc.nextLine());
-                    if (sc.hasNextLine()) bufferedWriter.append("\n");
+                    if (sc.hasNextLine()) {
+                        bufferedWriter.append("\n");
+                    }
                 }
                 bufferedWriter.close();
                 IOException exc = sc.ioException();
-                if (exc != null) throw exc;
+                if (exc != null) {
+                    throw exc;
+                }
             } catch (IOException e) {
                 Log_OC.e(TAG, e.getMessage(), e);
                 finish();
@@ -373,8 +381,9 @@ public class PreviewTextFragment extends FileFragment {
     public void onStop() {
         super.onStop();
         Log_OC.e(TAG, "onStop");
-        if (mTextLoadTask != null)
+        if (mTextLoadTask != null) {
             mTextLoadTask.cancel(Boolean.TRUE);
+        }
     }
 
     /**
@@ -392,7 +401,13 @@ public class PreviewTextFragment extends FileFragment {
      * @return 'True' if the file can be handled by the fragment.
      */
     public static boolean canBePreviewed(OCFile file) {
-        return (file != null && file.isDown() && file.isText());
+        final List<String> supportedTypes = new LinkedList<String>();
+        supportedTypes.add("text/plain");
+        supportedTypes.add("text/html");
+        supportedTypes.add("text/css");
+        supportedTypes.add("text/csv");
+
+        return (file != null && file.isDown() && supportedTypes.contains(file.getMimetype()));
     }
 
     /**

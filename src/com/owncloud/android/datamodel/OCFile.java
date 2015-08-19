@@ -27,6 +27,7 @@ import com.owncloud.android.lib.common.utils.Log_OC;
 import java.io.File;
 
 import third_parties.daveKoeller.AlphanumComparator;
+
 public class OCFile implements Parcelable, Comparable<OCFile> {
 
     public static final Parcelable.Creator<OCFile> CREATOR = new Parcelable.Creator<OCFile>() {
@@ -73,7 +74,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
 
     /**
      * Create new {@link OCFile} with given path.
-     * <p/>
+     * <p>
      * The path received must be URL-decoded. Path separator must be OCFile.PATH_SEPARATOR, and it must be the first character in 'path'.
      *
      * @param path The remote path of the file.
@@ -236,7 +237,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
 
     /**
      * Set a UNIX timestamp of the time the time the file was modified.
-     * <p/>
+     * <p>
      * To update with the value returned by the server in every synchronization of the properties
      * of this file.
      *
@@ -259,7 +260,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
 
     /**
      * Set a UNIX timestamp of the time the time the file was modified.
-     * <p/>
+     * <p>
      * To update with the value returned by the server in every synchronization of THE CONTENTS
      * of this file.
      *
@@ -282,7 +283,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
 
     /**
      * Sets the name of the file
-     * <p/>
+     * <p>
      * Does nothing if the new name is null, empty or includes "/" ; or if the file is the root directory
      */
     public void setFileName(String name) {
@@ -454,10 +455,16 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
     public int compareTo(OCFile another) {
         if (isFolder() && another.isFolder()) {
             return getRemotePath().toLowerCase().compareTo(another.getRemotePath().toLowerCase());
-        } else if (isFolder()) {
-            return -1;
-        } else if (another.isFolder()) {
-            return 1;
+        }
+        else {
+            if (isFolder()) {
+                return -1;
+            }
+            else {
+                if (another.isFolder()) {
+                    return 1;
+                }
+            }
         }
         return new AlphanumComparator().compare(this, another);
     }
@@ -534,13 +541,6 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
     public boolean isImage() {
         return ((mMimeType != null && mMimeType.startsWith("image/")) ||
                 getMimeTypeFromName().startsWith("image/"));
-    }
-
-    /**
-     * @return 'True' if the file is simple text (e.g. not application-dependent, like .doc or .docx)
-     */
-    public boolean isText() {
-        return ((mMimeType != null && mMimeType.startsWith("text/")) || getMimeTypeFromName().startsWith("text/"));
     }
 
     public String getMimeTypeFromName() {
